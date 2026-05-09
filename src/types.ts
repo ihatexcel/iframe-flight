@@ -1,5 +1,6 @@
 export type { StateValue, ListenModeValue, MessageTypeValue } from './constants';
 import type { StateValue, ListenModeValue } from './constants';
+import type { Table } from 'apache-arrow';
 
 export interface BridgeMessage {
   type: string;
@@ -33,11 +34,6 @@ export interface DataReceivedMessage extends BridgeMessage {
   error?: string;
 }
 
-export interface ArrowTable {
-  numRows: number;
-  numCols: number;
-}
-
 export interface DataResult {
   format: string;
   rows: number;
@@ -49,7 +45,9 @@ export interface DataResult {
   correlationId: string | null;
   processingTime?: number;
   schema?: string | null;
-  table?: ArrowTable;
+  // Present for arrow-zerocopy and arrow-copy formats
+  table?: Table;
+  // Present for json format
   data?: unknown;
 }
 
@@ -99,12 +97,4 @@ export interface PendingAck {
   resolve: (value: AckResult) => void;
   reject: (reason: Error) => void;
   timeout: ReturnType<typeof setTimeout>;
-}
-
-declare global {
-  interface Window {
-    Arrow?: {
-      tableFromIPC: (buffer: Uint8Array) => ArrowTable;
-    };
-  }
 }

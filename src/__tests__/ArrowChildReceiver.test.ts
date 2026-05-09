@@ -169,16 +169,17 @@ describe('ArrowChildReceiver', () => {
     expect(dataCb.mock.calls[0][0].data).toEqual([{ x: 3 }]);
   });
 
-  it('fires onError and sends failure ACK when Arrow is not loaded', async () => {
+  it('fires onError and sends failure ACK on unknown format', async () => {
     const errorCb = vi.fn();
     const postSpy = vi.spyOn(window.parent, 'postMessage');
     receiver = new ArrowChildReceiver().onError(errorCb);
 
-    const msg = makeDataTransferMsg({ format: 'arrow-copy', data: new Uint8Array([1, 2, 3]) });
+    const msg = makeDataTransferMsg({ format: 'xml' });
     dispatchMessage(msg);
     await flush();
 
-    expect(errorCb).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('Arrow library not loaded') }));
+    expect(errorCb).toHaveBeenCalledOnce();
+    expect(errorCb.mock.calls[0][0].message).toContain('Unknown format');
     expect(postSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: MessageType.DATA_RECEIVED, success: false }),
       '*'

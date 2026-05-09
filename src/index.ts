@@ -18,3 +18,16 @@ export type {
   ReadyCallback,
   DataCallback,
 } from './types';
+
+// Re-export Apache Arrow so consumers only need iframe-flight
+export {
+  tableFromIPC,
+  tableToIPC,
+  tableFromArrays,
+  Table,
+  Schema,
+  Field,
+  RecordBatch,
+  RecordBatchReader,
+  RecordBatchWriter,
+} from 'apache-arrow';
