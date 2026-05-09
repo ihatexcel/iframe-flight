@@ -1,0 +1,74 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main, 'claude/**', 'feat/**', 'fix/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build, Test & Publish Artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test -- --reporter=verbose
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iframe-flight-dist-${{ github.sha }}
+          path: dist/
+          retention-days: 30
+
+      # Pseudo-CDN: commit dist to gh-pages/cdn branch for easy access
+      # This makes files available at:
+      #   https://raw.githubusercontent.com/ihatexcel/iframe-flight/<branch>/cdn/iframe-flight.iife.js
+      - name: Publish to cdn branch (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Save dist files
+          mkdir -p /tmp/cdn-payload
+          cp dist/index.iife.js  /tmp/cdn-payload/iframe-flight.iife.js
+          cp dist/index.js       /tmp/cdn-payload/iframe-flight.esm.js
+          cp dist/index.cjs      /tmp/cdn-payload/iframe-flight.cjs.js
+          cp dist/index.d.ts     /tmp/cdn-payload/iframe-flight.d.ts
+          echo "${{ github.sha }}" > /tmp/cdn-payload/version.txt
+
+          # Switch to (or create) cdn branch
+          git fetch origin cdn 2>/dev/null || true
+          git checkout -B cdn origin/cdn 2>/dev/null || git checkout --orphan cdn
+
+          # Keep only cdn folder
+          git rm -rf . --quiet 2>/dev/null || true
+          mkdir -p cdn
+          cp /tmp/cdn-payload/* cdn/
+
+          git add cdn/
+          git commit -m "cdn: build from ${{ github.sha }}" || echo "Nothing to commit"
+          git push -u origin cdn

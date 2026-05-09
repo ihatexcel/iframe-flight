@@ -1,0 +1,57 @@
+{
+  "name": "iframe-flight",
+  "version": "0.1.0",
+  "description": "High-performance data transport library for iframes with zero-copy support via SharedArrayBuffer.",
+  "author": "ihatexcel",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "browser": "./dist/index.iife.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.1",
+    "happy-dom": "^17.5.4"
+  },
+  "keywords": [
+    "iframe",
+    "postmessage",
+    "sharedarraybuffer",
+    "zero-copy",
+    "apache-arrow",
+    "bridge",
+    "microfrontend",
+    "data-transfer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ihatexcel/iframe-flight.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ihatexcel/iframe-flight/issues"
+  },
+  "homepage": "https://github.com/ihatexcel/iframe-flight#readme"
+}
