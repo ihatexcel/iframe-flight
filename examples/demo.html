@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iframe-flight demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: #fff;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 1100px;
+    }
+
+    .panel {
+      background: #1e2330;
+      border: 1px solid #2d3448;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 0.75rem 1rem;
+      background: #252c3f;
+      border-bottom: 1px solid #2d3448;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-connecting { background: #92400e; color: #fde68a; }
+    .badge-ready      { background: #065f46; color: #6ee7b7; }
+    .badge-sending    { background: #1e3a5f; color: #93c5fd; }
+    .badge-error      { background: #7f1d1d; color: #fca5a5; }
+    .badge-closed     { background: #374151; color: #9ca3af; }
+
+    .controls {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    button {
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: opacity 0.15s;
+    }
+
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary   { background: #3b82f6; color: #fff; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-danger    { background: #ef4444; color: #fff; }
+
+    .log {
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.78rem;
+      padding: 1rem;
+      height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .log-entry {
+      display: flex;
+      gap: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .log-time { color: #475569; flex-shrink: 0; }
+    .log-msg  { color: #cbd5e1; word-break: break-all; }
+    .log-ok   .log-msg { color: #34d399; }
+    .log-err  .log-msg { color: #f87171; }
+    .log-info .log-msg { color: #60a5fa; }
+
+    iframe#child-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .iframe-wrap {
+      height: 260px;
+      border-top: 1px solid #2d3448;
+    }
+
+    .stats {
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .stat {
+      background: #252c3f;
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    .sab-info {
+      font-size: 0.75rem;
+      padding: 0.5rem 1rem;
+      color: #64748b;
+      border-top: 1px solid #2d3448;
+    }
+  </style>
+</head>
+<body>
+  <h1>iframe-flight</h1>
+  <p class="subtitle">Zero-copy iframe data transport demo</p>
+
+  <div class="layout">
+    <!-- PARENT PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        Parent window
+        <span id="parent-badge" class="badge badge-connecting">connecting</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="stat-sent">0</div>
+          <div class="stat-label">Messages sent</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-acked">0</div>
+          <div class="stat-label">ACKs received</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-time">—</div>
+          <div class="stat-label">Last RTT (ms)</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-primary"  id="btn-json"      disabled>Send JSON (auto)</button>
+        <button class="btn-secondary" id="btn-copy"     disabled>Send Arrow (copy)</button>
+        <button class="btn-secondary" id="btn-zerocopy" disabled>Send Arrow (zero-copy)</button>
+        <button class="btn-danger"   id="btn-close">Close connection</button>
+      </div>
+
+      <div class="sab-info" id="sab-info">Checking SharedArrayBuffer support…</div>
+
+      <div class="log" id="parent-log"></div>
+    </div>
+
+    <!-- CHILD PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        Child iframe
+        <span id="child-badge" class="badge badge-connecting">connecting</span>
+      </div>
+
+      <div class="log" id="child-log"></div>
+
+      <div class="iframe-wrap">
+        <iframe id="child-frame" src="child.html"
+          sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!--
+    In production, replace with CDN URL once published:
+    <script src="https://cdn.jsdelivr.net/npm/iframe-flight/dist/index.iife.js"></script>
+
+    During development / pseudo-CDN testing from the GitHub Actions artifact:
+    Download the artifact and serve locally, or use the raw GitHub URL from the cdn branch:
+    <script src="https://raw.githubusercontent.com/ihatexcel/iframe-flight/cdn/cdn/iframe-flight.iife.js"></script>
+  -->
+  <script type="module">
+    // -----------------------------------------------------------------------
+    // During dev: inline the lib so this file is self-contained for testing
+    // Replace with an actual <script src="…"> import once the build is done
+    // -----------------------------------------------------------------------
+    import { ArrowParentEmitter, State } from '../dist/index.js';
+
+    let sent = 0;
+    let acked = 0;
+
+    function log(panelId, msg, type = '') {
+      const panel = document.getElementById(panelId);
+      const now = new Date().toISOString().slice(11, 23);
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type ? 'log-' + type : ''}`;
+      entry.innerHTML = `<span class="log-time">${now}</span><span class="log-msg">${msg}</span>`;
+      panel.appendChild(entry);
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    function setBadge(id, state) {
+      const el = document.getElementById(id);
+      el.textContent = state.toLowerCase();
+      el.className = `badge badge-${state.toLowerCase()}`;
+    }
+
+    const iframe = document.getElementById('child-frame');
+
+    const emitter = new ArrowParentEmitter(iframe, {
+      handshakeTimeout: 6000,
+      ackTimeout: 4000,
+      allowedOrigins: ['*'],
+    });
+
+    document.getElementById('sab-info').textContent =
+      emitter.isSABSupported()
+        ? '⚡ SharedArrayBuffer available — zero-copy mode enabled'
+        : '⚠ SharedArrayBuffer not available — falling back to copy mode';
+
+    emitter
+      .onReady(() => {
+        log('parent-log', 'Child ready — connection established', 'ok');
+        setBadge('parent-badge', State.READY);
+        document.getElementById('btn-json').disabled = false;
+        document.getElementById('btn-copy').disabled = false;
+        if (emitter.isSABSupported()) {
+          document.getElementById('btn-zerocopy').disabled = false;
+        }
+      })
+      .onStateChange((next, prev) => {
+        setBadge('parent-badge', next);
+        log('parent-log', `State: ${prev} → ${next}`, 'info');
+      })
+      .onError((err) => {
+        log('parent-log', `Error: ${err.message}`, 'err');
+      });
+
+    async function doSend(fn, label) {
+      try {
+        const t0 = performance.now();
+        sent++;
+        document.getElementById('stat-sent').textContent = sent;
+        log('parent-log', `Sending ${label}…`);
+
+        const ack = await fn();
+        const rtt = Math.round(performance.now() - t0);
+        acked++;
+        document.getElementById('stat-acked').textContent = acked;
+        document.getElementById('stat-time').textContent = rtt;
+        log('parent-log', `ACK ✓  rows=${ack.rows}  cols=${ack.cols}  time=${ack.processingTime}ms  zeroCopy=${ack.isZeroCopy}`, 'ok');
+      } catch (e) {
+        log('parent-log', `Send failed: ${e.message}`, 'err');
+      }
+    }
+
+    document.getElementById('btn-json').addEventListener('click', () => {
+      doSend(() => emitter.sendJSON([
+        { id: 1, name: 'Alice',   score: 95.5 },
+        { id: 2, name: 'Bob',     score: 87.3 },
+        { id: 3, name: 'Charlie', score: 92.1 },
+      ]), 'JSON');
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', () => {
+      const buf = new Uint8Array(64).fill(42);
+      doSend(() => emitter.sendArrowCopy(buf, { schema: 'demo-schema' }), 'Arrow (copy)');
+    });
+
+    document.getElementById('btn-zerocopy').addEventListener('click', () => {
+      const buf = new Uint8Array(64).fill(7);
+      doSend(() => emitter.sendArrowZeroCopy(buf), 'Arrow (zero-copy)');
+    });
+
+    document.getElementById('btn-close').addEventListener('click', () => {
+      emitter.close();
+      ['btn-json', 'btn-copy', 'btn-zerocopy'].forEach(id => {
+        document.getElementById(id).disabled = true;
+      });
+      log('parent-log', 'Connection closed', 'err');
+    });
+
+    // Relay child log messages to the child-log panel
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === '__DEMO_LOG__') {
+        log('child-log', e.data.msg, e.data.level || '');
+        setBadge('child-badge', e.data.state || 'CONNECTING');
+      }
+    });
+  </script>
+</body>
+</html>
