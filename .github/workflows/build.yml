@@ -1,4 +1,4 @@
-name: Build & Test
+name: Build, Test & Deploy
 
 on:
   push:
@@ -8,18 +8,25 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
+  # ─────────────────────────────────────────────────────────────
+  # 1. Build & test
+  # ─────────────────────────────────────────────────────────────
   build:
-    name: Build, Test & Publish Artifacts
+    name: Build & Test
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
@@ -33,42 +40,47 @@ jobs:
       - name: Run tests
         run: npm test -- --reporter=verbose
 
-      - name: Build
+      - name: Build library
         run: npm run build
 
-      - name: Upload dist as artifact
+      # Upload dist as downloadable artifact (30-day retention)
+      - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
           name: iframe-flight-dist-${{ github.sha }}
           path: dist/
           retention-days: 30
 
-      # Pseudo-CDN: commit dist to gh-pages/cdn branch for easy access
-      # This makes files available at:
-      #   https://raw.githubusercontent.com/ihatexcel/iframe-flight/<branch>/cdn/iframe-flight.iife.js
-      - name: Publish to cdn branch (main only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      # ── Assemble Pages site ──────────────────────────────────
+      # Structure: docs/ + the IIFE file renamed iframe-flight.iife.js
+      - name: Assemble GitHub Pages site
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p _site
+          cp docs/index.html _site/index.html
+          cp docs/child.html _site/child.html
+          cp dist/index.iife.js _site/iframe-flight.iife.js
 
-          # Save dist files
-          mkdir -p /tmp/cdn-payload
-          cp dist/index.iife.js  /tmp/cdn-payload/iframe-flight.iife.js
-          cp dist/index.js       /tmp/cdn-payload/iframe-flight.esm.js
-          cp dist/index.cjs      /tmp/cdn-payload/iframe-flight.cjs.js
-          cp dist/index.d.ts     /tmp/cdn-payload/iframe-flight.d.ts
-          echo "${{ github.sha }}" > /tmp/cdn-payload/version.txt
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site/
 
-          # Switch to (or create) cdn branch
-          git fetch origin cdn 2>/dev/null || true
-          git checkout -B cdn origin/cdn 2>/dev/null || git checkout --orphan cdn
-
-          # Keep only cdn folder
-          git rm -rf . --quiet 2>/dev/null || true
-          mkdir -p cdn
-          cp /tmp/cdn-payload/* cdn/
-
-          git add cdn/
-          git commit -m "cdn: build from ${{ github.sha }}" || echo "Nothing to commit"
-          git push -u origin cdn
+  # ─────────────────────────────────────────────────────────────
+  # 2. Deploy to GitHub Pages
+  #    Runs on every push (all branches), so you can preview
+  #    your branch at https://ihatexcel.github.io/iframe-flight/
+  #    Note: Pages always shows the last successful deployment.
+  # ─────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    # Only deploy on push events (not PRs from forks)
+    if: github.event_name == 'push'
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
