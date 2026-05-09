@@ -78,8 +78,8 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
-    # Only deploy on push events (not PRs from forks)
-    if: github.event_name == 'push'
+    # Only deploy on push to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}

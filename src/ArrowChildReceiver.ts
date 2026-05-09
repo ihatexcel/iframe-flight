@@ -1,3 +1,4 @@
+import { tableFromIPC } from 'apache-arrow';
 import { PROTOCOL_VERSION, State, ListenMode, MessageType } from './constants';
 import type { StateValue, ListenModeValue, StateChangeCallback, ErrorCallback, DataCallback, DataResult, ChildReceiverConfig } from './types';
 import { BridgeUtils } from './utils';
@@ -130,12 +131,7 @@ export class ArrowChildReceiver {
 
       if (format === 'arrow-zerocopy') {
         const sharedView = new Uint8Array(sharedBuffer as SharedArrayBuffer, Number(offset), Number(length));
-
-        if (typeof window.Arrow === 'undefined') {
-          throw new Error('Arrow library not loaded - include Apache Arrow before using this library');
-        }
-
-        const table = window.Arrow.tableFromIPC(sharedView);
+        const table = tableFromIPC(sharedView);
         result = {
           table,
           format: 'arrow-zerocopy',
@@ -154,12 +150,7 @@ export class ArrowChildReceiver {
         if (compressed) buffer = await BridgeUtils.decompress(data);
 
         const uint8Buffer = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer as ArrayBuffer);
-
-        if (typeof window.Arrow === 'undefined') {
-          throw new Error('Arrow library not loaded - include Apache Arrow before using this library');
-        }
-
-        const table = window.Arrow.tableFromIPC(uint8Buffer);
+        const table = tableFromIPC(uint8Buffer);
         result = {
           table,
           format: 'arrow-copy',
