@@ -18,6 +18,7 @@
       --red:     #f85149;
       --yellow:  #d29922;
       --purple:  #bc8cff;
+      --orange:  #e3b341;
     }
 
     body {
@@ -31,113 +32,119 @@
     }
 
     .top-bar {
-      padding: 0.5rem 0.75rem;
+      padding: 0.45rem 0.75rem;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.72rem;
-      font-weight: 600;
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem; font-weight: 600;
       flex-shrink: 0;
     }
 
     .dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--yellow);
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--yellow); flex-shrink: 0;
       animation: pulse 1.2s infinite;
-      flex-shrink: 0;
     }
-    .dot.ready { background: var(--green); animation: none; box-shadow: 0 0 5px var(--green); }
-    .dot.error { background: var(--red); animation: none; }
-
-    @keyframes pulse {
-      0%,100% { opacity:1; } 50% { opacity:0.3; }
-    }
+    .dot.ready  { background: var(--green);  animation: none; box-shadow: 0 0 5px var(--green); }
+    .dot.recv   { background: var(--purple); animation: none; box-shadow: 0 0 5px var(--purple); }
+    .dot.error  { background: var(--red);    animation: none; }
+    .dot.closed { background: var(--muted);  animation: none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
     .state-txt { color: var(--text); }
 
-    /* Handshake visualisation inside child */
-    .hs-row {
-      padding: 0.4rem 0.75rem;
+    /* Mode badge */
+    .mode-badge {
+      margin-left: auto;
+      padding: .1rem .45rem;
+      border-radius: 4px;
+      font-size: 0.62rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .mode-continuous { background: #1f3a5f; color: #93c5fd; border: 1px solid #388bfd33; }
+    .mode-first      { background: #2d2a1a; color: var(--orange); border: 1px solid #e3b34133; }
+
+    /* Handshake + listen state bar */
+    .status-bar {
+      padding: 0.35rem 0.75rem;
       border-bottom: 1px solid var(--border);
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
+      display: flex; align-items: center; gap: 0.35rem;
       flex-shrink: 0;
     }
-    .hs-row span { transition: color 0.3s; }
-    .hs-row .done { color: var(--green); }
+    .status-bar span { transition: color .25s; }
+    .status-bar .done { color: var(--green); }
+    .status-bar .sep  { color: var(--border); }
 
+    /* Listen state indicator */
+    .listen-state {
+      margin-left: auto;
+      font-size: 0.65rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .listen-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 4px var(--green);
+    }
+    .listen-dot.paused { background: var(--muted); box-shadow: none; }
+
+    /* Log */
     .log {
       font-family: 'SFMono-Regular', 'Fira Code', monospace;
-      font-size: 0.7rem;
-      padding: 0.5rem 0.75rem;
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border) transparent;
+      font-size: 0.68rem; padding: 0.5rem 0.75rem;
+      flex: 1; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 0.18rem;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
     }
-
     .log-row {
-      display: grid;
-      grid-template-columns: 5rem 1fr;
-      gap: 0.3rem;
-      line-height: 1.45;
+      display: grid; grid-template-columns: 5rem 1fr;
+      gap: 0.3rem; line-height: 1.45;
     }
     .log-ts  { color: var(--muted); }
     .log-msg { color: var(--text); word-break: break-all; }
     .log-row.ok   .log-msg { color: var(--green); }
     .log-row.err  .log-msg { color: var(--red); }
     .log-row.info .log-msg { color: var(--accent); }
-    .log-row.warn .log-msg { color: var(--yellow); }
     .log-row.recv .log-msg { color: var(--purple); }
 
-    /* Last received data preview */
-    .data-preview {
-      padding: 0.5rem 0.75rem;
+    /* Data preview */
+    .preview {
+      padding: 0.45rem 0.75rem;
       border-top: 1px solid var(--border);
-      font-size: 0.7rem;
-      font-family: 'SFMono-Regular', 'Fira Code', monospace;
-      color: var(--muted);
-      background: #0d1117;
-      min-height: 2rem;
-      flex-shrink: 0;
-      white-space: pre-wrap;
-      word-break: break-all;
-      max-height: 80px;
-      overflow: auto;
+      font-family: 'SFMono-Regular', monospace;
+      font-size: 0.68rem; color: var(--muted);
+      background: #080c10; min-height: 2rem;
+      flex-shrink: 0; white-space: pre-wrap;
+      word-break: break-all; max-height: 80px; overflow: auto;
     }
-    .data-preview.has-data { color: var(--purple); }
+    .preview.has-data { color: var(--purple); }
   </style>
 </head>
 <body>
 
   <div class="top-bar">
     <div class="dot" id="dot"></div>
-    Child receiver —
+    Child —
     <span class="state-txt" id="state-txt">CONNECTING</span>
+    <span class="mode-badge" id="mode-badge">…</span>
   </div>
 
-  <div class="hs-row">
+  <div class="status-bar">
     <span id="hs-sent">⬜ CHILD_READY sent</span>
-    <span>→</span>
+    <span class="sep">→</span>
     <span id="hs-ack">⬜ PARENT_ACK received</span>
-    <span>→</span>
+    <span class="sep">→</span>
     <span id="hs-ready">⬜ Ready</span>
+    <div class="listen-state">
+      <div class="listen-dot" id="listen-dot"></div>
+      <span id="listen-label">listening</span>
+    </div>
   </div>
 
   <div class="log" id="log"></div>
+  <div class="preview" id="preview">No data received yet.</div>
 
-  <div class="data-preview" id="preview">No data received yet.</div>
-
-<!-- iframe-flight IIFE — exposes window.ArrowBridge (Arrow bundled inside) -->
 <script src="./iframe-flight.iife.js"></script>
 <script>
 (function () {
@@ -145,14 +152,27 @@
 
   const { ArrowChildReceiver, ListenMode, State } = window.ArrowBridge;
 
+  /* ── Read mode from URL param ── */
+  var params   = new URLSearchParams(window.location.search);
+  var modeParam = params.get('mode');
+  var isFirst  = modeParam === 'first';
+  var listenMode = isFirst ? ListenMode.FIRST_MESSAGE : ListenMode.CONTINUOUS;
+  var listenDelay = parseInt(params.get('delay') || '0', 10);
+
+  var badge = document.getElementById('mode-badge');
+  if (isFirst) {
+    badge.textContent = 'FIRST_MESSAGE';
+    badge.className   = 'mode-badge mode-first';
+  } else {
+    badge.textContent = 'CONTINUOUS' + (listenDelay ? ' (' + listenDelay + 'ms debounce)' : '');
+    badge.className   = 'mode-badge mode-continuous';
+  }
+
   /* ── DOM helpers ── */
   function q(id) { return document.getElementById(id); }
 
   function escHtml(s) {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function log(msg, type) {
@@ -161,45 +181,42 @@
     var row   = document.createElement('div');
     row.className = 'log-row' + (type ? ' ' + type : '');
     row.innerHTML =
-      '<span class="log-ts">'  + now + '</span>' +
+      '<span class="log-ts">' + now + '</span>' +
       '<span class="log-msg">' + escHtml(msg) + '</span>';
     panel.appendChild(row);
     panel.scrollTop = panel.scrollHeight;
   }
 
-  /* Relay to parent for the child-log panel in parent page */
   function relay(msg, type, state) {
-    try {
-      window.parent.postMessage({
-        __iframeFlight: 'log',
-        msg: msg,
-        type: type,
-        state: state,
-      }, '*');
-    } catch (_) {}
+    try { window.parent.postMessage({ __iframeFlight: 'log', msg, type, state }, '*'); } catch(_){}
   }
 
   function setDot(s) {
-    var dot = q('dot');
-    dot.className = 'dot' + (s === State.READY ? ' ready' : s === State.ERROR ? ' error' : '');
+    var cls = { READY:'ready', RECEIVING:'recv', ERROR:'error', CLOSED:'closed' }[s] || '';
+    q('dot').className = 'dot ' + cls;
     q('state-txt').textContent = s;
+  }
+
+  function setListenIndicator(active) {
+    q('listen-dot').className   = 'listen-dot' + (active ? '' : ' paused');
+    q('listen-label').textContent = active ? 'listening' : 'paused';
   }
 
   function hsStep(id) {
     var el = q(id);
     el.textContent = el.textContent.replace('⬜', '✅');
-    el.className = 'done';
+    el.className   = 'done';
   }
 
   /* ── Receiver ── */
-  const receiver = new ArrowChildReceiver({
-    listenMode: ListenMode.CONTINUOUS,
-    listenDelay: 0,
+  var receiver = new ArrowChildReceiver({
+    listenMode:   listenMode,
+    listenDelay:  listenDelay,
     allowedOrigins: ['*'],
   });
 
-  log('Receiver initialised — CHILD_READY sent to parent', 'info');
-  relay('CHILD_READY sent to parent', 'info', State.CONNECTING);
+  log('Receiver init — CHILD_READY sent', 'info');
+  relay('CHILD_READY sent (mode=' + (isFirst ? 'FIRST_MESSAGE' : 'CONTINUOUS') + ')', 'info', State.CONNECTING);
   hsStep('hs-sent');
 
   receiver
@@ -212,52 +229,65 @@
         hsStep('hs-ack');
         hsStep('hs-ready');
         log('✅ Handshake complete — listening for data', 'ok');
-        relay('✅ Handshake complete — listening for data', 'ok', next);
+        relay('✅ Handshake complete', 'ok', next);
       }
     })
     .onData(function (result) {
-      var mode = result.isZeroCopy ? '⚡ zero-copy' : 'copy';
-      var summary =
-        '📥 [' + result.format + '] ' + mode +
-        ' | rows=' + result.rows +
-        ' cols=' + result.cols +
-        ' size=' + result.size + 'B' +
-        ' time=' + result.processingTime + 'ms';
+      var mode    = result.isZeroCopy ? '⚡ zero-copy' : 'copy';
+      var summary = '📥 [' + result.format + '] ' + mode +
+        ' | rows=' + result.rows + ' cols=' + result.cols +
+        ' size=' + result.size + 'B time=' + result.processingTime + 'ms';
 
       log(summary, 'recv');
       relay(summary, 'recv', receiver.getState());
 
-      /* Update preview */
+      /* preview */
       var preview = q('preview');
-      preview.className = 'data-preview has-data';
+      preview.className = 'preview has-data';
       if (result.data !== undefined) {
         preview.textContent = JSON.stringify(result.data, null, 2).slice(0, 400);
       } else if (result.table) {
-        var t = result.table;
-        var lines = ['Arrow table: ' + result.rows + ' rows × ' + result.cols + ' cols  isZeroCopy=' + result.isZeroCopy];
-        // Show first 5 rows as JSON-like preview
-        var rowCount = Math.min(result.rows, 5);
-        for (var r = 0; r < rowCount; r++) {
-          var rowObj = {};
+        var t     = result.table;
+        var lines = ['Arrow table: ' + result.rows + ' rows × ' + result.cols + ' cols  zeroCopy=' + result.isZeroCopy];
+        var count = Math.min(result.rows, 5);
+        for (var r = 0; r < count; r++) {
+          var obj = {};
           for (var c = 0; c < t.schema.fields.length; c++) {
-            var field = t.schema.fields[c];
-            rowObj[field.name] = t.getChildAt(c).get(r);
+            obj[t.schema.fields[c].name] = t.getChildAt(c).get(r);
           }
-          lines.push('  ' + JSON.stringify(rowObj));
+          lines.push('  ' + JSON.stringify(obj));
         }
         if (result.rows > 5) lines.push('  … (' + (result.rows - 5) + ' more rows)');
         preview.textContent = lines.join('\n');
       }
 
+      /* FIRST_MESSAGE: show paused indicator, then log resume */
+      if (isFirst) {
+        setListenIndicator(false);
+        log('⏸ Paused — waiting for resumeListening()', 'warn');
+        relay('⏸ FIRST_MESSAGE — listening paused', 'warn', receiver.getState());
+      }
+
       if (result.correlationId) {
         log('correlationId: ' + result.correlationId, '');
-        relay('correlationId: ' + result.correlationId, '', receiver.getState());
       }
     })
     .onError(function (err) {
       log('❌ ' + err.message, 'err');
       relay('❌ ' + err.message, 'err', receiver.getState());
     });
+
+  /* The parent can send a 'resume' command message to trigger resumeListening() */
+  window.addEventListener('message', function (e) {
+    if (!e.data) return;
+    if (e.data.__iframeFlight === 'resume') {
+      receiver.resumeListening();
+      setListenIndicator(true);
+      log('▶ resumeListening() called — ready for next message', 'ok');
+      relay('▶ resumeListening() called', 'ok', receiver.getState());
+    }
+  });
+
 })();
 </script>
 </body>
