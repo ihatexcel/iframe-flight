@@ -323,7 +323,7 @@
     <div class="iframe-shell">
       <span class="iframe-label">live iframe ↓</span>
       <iframe id="child-frame" src="./child.html"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts"
         title="iframe-flight child receiver demo"></iframe>
     </div>
   </div>
@@ -341,15 +341,13 @@
   </p>
 </footer>
 
-<!-- Apache Arrow (sets window.Arrow) -->
-<script src="https://cdn.jsdelivr.net/npm/apache-arrow/Arrow.dom.js"></script>
-<!-- IIFE build — window.ArrowBridge -->
+<!-- iframe-flight IIFE — exposes window.ArrowBridge (Arrow bundled inside) -->
 <script src="./iframe-flight.iife.js"></script>
 <script>
 (function () {
   'use strict';
 
-  const { ArrowParentEmitter, State } = window.ArrowBridge;
+  const { ArrowParentEmitter, State, tableFromArrays, tableToIPC } = window.ArrowBridge;
 
   /* ── Counters ── */
   let sent = 0;
@@ -471,24 +469,24 @@
 
   q('btn-copy').addEventListener('click', function () {
     doSend('Arrow copy (IPC)', function () {
-      var table = window.Arrow.tableFromArrays({
+      var table = tableFromArrays({
         id:    [1, 2, 3, 4, 5],
         label: ['alpha', 'beta', 'gamma', 'delta', 'epsilon'],
         value: [1.1, 2.2, 3.3, 4.4, 5.5],
       });
-      var buf = window.Arrow.tableToIPC(table);
+      var buf = tableToIPC(table);
       return emitter.sendArrowCopy(buf, { schema: table.schema.toString() });
     });
   });
 
   q('btn-zerocopy').addEventListener('click', function () {
     doSend('Arrow zero-copy (IPC)', function () {
-      var table = window.Arrow.tableFromArrays({
+      var table = tableFromArrays({
         id:    [10, 20, 30],
         label: ['x', 'y', 'z'],
         value: [9.9, 8.8, 7.7],
       });
-      var buf = window.Arrow.tableToIPC(table);
+      var buf = tableToIPC(table);
       return emitter.sendArrowZeroCopy(buf);
     });
   });
