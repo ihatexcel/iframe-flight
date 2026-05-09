@@ -137,6 +137,8 @@
 
   <div class="data-preview" id="preview">No data received yet.</div>
 
+<!-- Apache Arrow (sets window.Arrow) -->
+<script src="https://cdn.jsdelivr.net/npm/apache-arrow/Arrow.dom.js"></script>
 <script src="./iframe-flight.iife.js"></script>
 <script>
 (function () {
@@ -232,9 +234,20 @@
       if (result.data !== undefined) {
         preview.textContent = JSON.stringify(result.data, null, 2).slice(0, 400);
       } else if (result.table) {
-        preview.textContent =
-          'Arrow table: ' + result.rows + ' rows × ' + result.cols + ' cols\n' +
-          'isZeroCopy: ' + result.isZeroCopy;
+        var t = result.table;
+        var lines = ['Arrow table: ' + result.rows + ' rows × ' + result.cols + ' cols  isZeroCopy=' + result.isZeroCopy];
+        // Show first 5 rows as JSON-like preview
+        var rowCount = Math.min(result.rows, 5);
+        for (var r = 0; r < rowCount; r++) {
+          var rowObj = {};
+          for (var c = 0; c < t.schema.fields.length; c++) {
+            var field = t.schema.fields[c];
+            rowObj[field.name] = t.getChildAt(c).get(r);
+          }
+          lines.push('  ' + JSON.stringify(rowObj));
+        }
+        if (result.rows > 5) lines.push('  … (' + (result.rows - 5) + ' more rows)');
+        preview.textContent = lines.join('\n');
       }
 
       if (result.correlationId) {
