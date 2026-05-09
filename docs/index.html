@@ -8,17 +8,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --border:    #30363d;
-      --muted:     #8b949e;
-      --text:      #c9d1d9;
-      --accent:    #58a6ff;
-      --green:     #3fb950;
-      --yellow:    #d29922;
-      --red:       #f85149;
-      --purple:    #bc8cff;
-      --radius:    8px;
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --muted:   #8b949e;
+      --text:    #c9d1d9;
+      --accent:  #58a6ff;
+      --green:   #3fb950;
+      --yellow:  #d29922;
+      --red:     #f85149;
+      --purple:  #bc8cff;
+      --orange:  #e3b341;
+      --radius:  8px;
     }
 
     body {
@@ -27,24 +28,28 @@
       color: var(--text);
       min-height: 100vh;
       padding: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     /* ── Header ── */
-    header {
-      display: flex;
-      align-items: baseline;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+    header { margin-bottom: 1.5rem; }
+    .header-row { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.25rem; }
+    header h1 { font-size: 1.35rem; color: #fff; letter-spacing: -0.02em; }
+    .version-badge {
+      font-size: 0.7rem; font-weight: 600;
+      background: #1f6feb44; color: var(--accent);
+      border: 1px solid #388bfd44;
+      padding: 0.1rem 0.5rem; border-radius: 9999px;
     }
-    header h1 { font-size: 1.25rem; color: #fff; }
-    header p  { font-size: 0.8rem; color: var(--muted); }
+    header p { font-size: 0.8rem; color: var(--muted); }
 
-    /* ── Layout ── */
-    .grid {
+    /* ── Live demo grid ── */
+    .demo-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
-      max-width: 1100px;
+      margin-bottom: 2rem;
     }
 
     /* ── Card ── */
@@ -58,10 +63,10 @@
     }
 
     .card-head {
-      padding: 0.6rem 1rem;
+      padding: 0.55rem 1rem;
       background: #1c2128;
       border-bottom: 1px solid var(--border);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--muted);
       text-transform: uppercase;
@@ -71,7 +76,7 @@
       gap: 0.5rem;
     }
 
-    /* ── State badge ── */
+    /* ── State dot ── */
     .state-dot {
       width: 8px; height: 8px;
       border-radius: 50%;
@@ -80,176 +85,261 @@
       transition: background 0.3s;
     }
     .state-dot.CONNECTING { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); animation: pulse 1.2s infinite; }
-    .state-dot.READY      { background: var(--green);  box-shadow: 0 0 6px var(--green); }
-    .state-dot.SENDING    { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-    .state-dot.RECEIVING  { background: var(--purple); box-shadow: 0 0 6px var(--purple); }
-    .state-dot.ERROR      { background: var(--red);    box-shadow: 0 0 6px var(--red); }
+    .state-dot.READY      { background: var(--green);  box-shadow: 0 0 5px var(--green); }
+    .state-dot.SENDING    { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
+    .state-dot.RECEIVING  { background: var(--purple); box-shadow: 0 0 5px var(--purple); }
+    .state-dot.ERROR      { background: var(--red);    box-shadow: 0 0 5px var(--red); }
     .state-dot.CLOSED     { background: var(--muted); }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
-    }
-
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
     .state-label { color: var(--text); font-weight: 700; }
 
     /* ── Handshake steps ── */
     .handshake {
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 1rem;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 0;
-      font-size: 0.72rem;
+      display: flex; align-items: center; gap: 0;
+      font-size: 0.7rem;
     }
-
-    .hs-step {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      color: var(--muted);
-      transition: color 0.3s;
-    }
-    .hs-step.done  { color: var(--green); }
-    .hs-step.active { color: var(--accent); }
-
-    .hs-icon { font-size: 0.9rem; }
-    .hs-arrow {
-      margin: 0 0.4rem;
-      color: var(--border);
-      transition: color 0.3s;
-    }
+    .hs-step { display: flex; align-items: center; gap: 0.3rem; color: var(--muted); transition: color .25s; }
+    .hs-step.done { color: var(--green); }
+    .hs-icon { font-size: 0.85rem; }
+    .hs-arrow { margin: 0 0.35rem; color: var(--border); transition: color .25s; }
     .hs-arrow.done { color: var(--green); }
 
-    /* ── Stats row ── */
+    /* ── Stats ── */
     .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: grid; grid-template-columns: repeat(3,1fr);
       border-bottom: 1px solid var(--border);
     }
-    .stat {
-      padding: 0.6rem 0;
-      text-align: center;
-      border-right: 1px solid var(--border);
-    }
+    .stat { padding: 0.5rem 0; text-align: center; border-right: 1px solid var(--border); }
     .stat:last-child { border-right: none; }
-    .stat-val  { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
-    .stat-key  { font-size: 0.65rem; color: var(--muted); margin-top: 0.1rem; }
+    .stat-val { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+    .stat-key { font-size: 0.62rem; color: var(--muted); margin-top: 0.1rem; }
 
     /* ── Controls ── */
-    .controls {
-      padding: 0.75rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      border-bottom: 1px solid var(--border);
-    }
+    .controls { padding: 0.6rem 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; border-bottom: 1px solid var(--border); }
 
     button {
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: opacity 0.15s, transform 0.1s;
-      text-align: left;
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px; border: 1px solid transparent;
+      cursor: pointer; font-size: 0.78rem; font-weight: 600;
+      transition: opacity .15s, transform .1s; text-align: left;
     }
     button:active:not(:disabled) { transform: scale(0.98); }
     button:disabled { opacity: 0.35; cursor: not-allowed; }
-
-    .btn-blue   { background: #1f6feb; color: #fff; border-color: #388bfd44; }
-    .btn-grey   { background: #21262d; color: var(--text); border-color: var(--border); }
-    .btn-red    { background: #3d1a1a; color: var(--red);  border-color: #f8514944; }
-
+    .btn-star  { background: #2d3b1a; color: #7ee83f; border-color: #3fb95044; }
+    .btn-blue  { background: #1f6feb; color: #fff; border-color: #388bfd44; }
+    .btn-grey  { background: #21262d; color: var(--text); border-color: var(--border); }
+    .btn-red   { background: #3d1a1a; color: var(--red); border-color: #f8514944; }
     .btn-label { font-weight: 700; }
-    .btn-hint  { font-weight: 400; color: rgba(255,255,255,0.5); font-size: 0.72rem; margin-left: 0.4rem; }
+    .btn-hint  { font-weight: 400; color: rgba(255,255,255,.45); font-size: 0.7rem; margin-left: 0.35rem; }
 
     /* ── SAB notice ── */
-    .sab-notice {
-      padding: 0.4rem 1rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-    }
-    .sab-notice.ok  { color: var(--green); }
+    .sab-notice { padding: 0.35rem 1rem; font-size: 0.7rem; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .sab-notice.ok   { color: var(--green); }
     .sab-notice.warn { color: var(--yellow); }
 
     /* ── Log ── */
     .log {
       font-family: 'SFMono-Regular', 'Fira Code', monospace;
-      font-size: 0.72rem;
-      padding: 0.75rem;
-      flex: 1;
-      min-height: 180px;
-      max-height: 220px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border) transparent;
+      font-size: 0.7rem; padding: 0.6rem;
+      flex: 1; min-height: 160px; max-height: 200px;
+      overflow-y: auto; display: flex; flex-direction: column; gap: 0.18rem;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
     }
-
-    .log-row {
-      display: grid;
-      grid-template-columns: 5.5rem 1fr;
-      gap: 0.4rem;
-      line-height: 1.5;
-    }
-    .log-ts  { color: var(--muted); flex-shrink: 0; }
+    .log-row { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.3rem; line-height: 1.45; }
+    .log-ts  { color: var(--muted); }
     .log-msg { color: var(--text); word-break: break-word; }
     .log-row.ok   .log-msg { color: var(--green); }
     .log-row.err  .log-msg { color: var(--red); }
     .log-row.info .log-msg { color: var(--accent); }
-    .log-row.warn .log-msg { color: var(--yellow); }
     .log-row.recv .log-msg { color: var(--purple); }
 
-    /* ── Iframe ── */
-    .iframe-shell {
-      border-top: 1px solid var(--border);
-      position: relative;
-    }
+    /* ── Iframe shell ── */
+    .iframe-shell { border-top: 1px solid var(--border); position: relative; }
     .iframe-label {
-      position: absolute;
-      top: 0.4rem; left: 0.75rem;
-      font-size: 0.65rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--muted);
-      pointer-events: none;
-      z-index: 1;
+      position: absolute; top: 0.35rem; left: 0.75rem;
+      font-size: 0.62rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted); pointer-events: none; z-index: 1;
     }
-    iframe {
-      display: block;
-      width: 100%;
-      height: 340px;
-      border: none;
-      background: var(--bg);
+    iframe { display: block; width: 100%; height: 320px; border: none; background: var(--bg); }
+
+    /* ════════════════════════════════════════════
+       API REFERENCE SECTION
+    ════════════════════════════════════════════ */
+    .api-section { margin-bottom: 2rem; }
+
+    .section-title {
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
     }
 
-    /* ── Footer ── */
-    footer {
-      margin-top: 1rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-      max-width: 1100px;
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+    .tab {
+      padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; border: none; background: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .15s;
     }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Code block ── */
+    .code-block {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.4rem 0.75rem;
+      background: #1c2128; border-bottom: 1px solid var(--border);
+      font-size: 0.7rem;
+    }
+    .code-label {
+      color: var(--muted); font-weight: 600;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .code-label .badge {
+      padding: .1rem .4rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700;
+    }
+    .badge-star    { background: #2d3b1a; color: #7ee83f; }
+    .badge-parent  { background: #1f3a5f; color: #93c5fd; }
+    .badge-child   { background: #3b1f5f; color: var(--purple); }
+
+    .copy-btn {
+      display: flex; align-items: center; gap: 0.3rem;
+      padding: .25rem .55rem; border-radius: 5px;
+      font-size: 0.68rem; font-weight: 600;
+      background: #21262d; color: var(--muted);
+      border: 1px solid var(--border); cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--muted); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    .copy-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    pre {
+      padding: 1rem; overflow-x: auto; font-size: 0.75rem; line-height: 1.65;
+      font-family: 'SFMono-Regular', 'Fira Code', 'Cascadia Code', monospace;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+
+    /* Syntax colours */
+    .kw   { color: #ff7b72; }   /* keywords: const, import, new, return */
+    .fn   { color: #d2a8ff; }   /* function names */
+    .str  { color: #a5d6ff; }   /* strings */
+    .cm   { color: #8b949e; font-style: italic; } /* comments */
+    .num  { color: #79c0ff; }   /* numbers */
+    .obj  { color: #ffa657; }   /* objects / types */
+    .op   { color: #c9d1d9; }   /* operators */
+
+    /* ── Methods reference ── */
+    .method-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .method-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .method-card-head {
+      padding: 0.5rem 0.75rem;
+      background: #1c2128; border-bottom: 1px solid var(--border);
+      font-size: 0.72rem; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .method-list { list-style: none; padding: 0.25rem 0; }
+    .method-item {
+      padding: 0.4rem 0.75rem;
+      border-bottom: 1px solid #1c2128;
+      display: flex; align-items: baseline; gap: 0.6rem;
+      font-size: 0.73rem;
+    }
+    .method-item:last-child { border-bottom: none; }
+    .method-sig {
+      font-family: 'SFMono-Regular', 'Fira Code', monospace;
+      color: var(--accent); flex-shrink: 0;
+      font-size: 0.7rem;
+    }
+    .method-sig .m-kw { color: #ff7b72; }
+    .method-sig .m-fn { color: #d2a8ff; }
+    .method-sig .m-ty { color: #ffa657; }
+    .method-desc { color: var(--muted); font-size: 0.7rem; flex: 1; }
+    .star-badge {
+      font-size: 0.6rem; font-weight: 700;
+      background: #2d3b1a; color: #7ee83f;
+      border: 1px solid #3fb95044;
+      padding: .05rem .35rem; border-radius: 4px; flex-shrink: 0;
+    }
+
+    .btn-purple { background: #2a1a3d; color: var(--purple); border-color: #bc8cff33; }
+
+    /* ── Mode selector ── */
+    .mode-selector {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.72rem; flex-shrink: 0;
+    }
+    .mode-selector label { color: var(--muted); font-weight: 600; }
+    .mode-radio { display: flex; gap: 0.35rem; }
+    .mode-radio input { display: none; }
+    .mode-radio label {
+      padding: .2rem .55rem; border-radius: 5px; cursor: pointer;
+      border: 1px solid var(--border); font-size: 0.7rem; font-weight: 600;
+      color: var(--muted); transition: all .15s;
+    }
+    .mode-radio input:checked + label {
+      border-color: var(--accent); color: var(--accent); background: #1f6feb1a;
+    }
+    .resume-btn {
+      margin-left: auto;
+      padding: .2rem .55rem; border-radius: 5px; cursor: pointer;
+      background: #2d3b1a; color: #7ee83f; border: 1px solid #3fb95044;
+      font-size: 0.7rem; font-weight: 600;
+    }
+    .resume-btn:disabled { opacity: .35; cursor: not-allowed; }
+    footer { margin-top: 1rem; font-size: 0.72rem; color: var(--muted); }
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
+    code { font-family: 'SFMono-Regular', monospace; font-size: 0.85em; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>✈ iframe-flight</h1>
-  <p>Zero-copy iframe data transport — live handshake demo</p>
+  <div class="header-row">
+    <h1>✈ iframe-flight</h1>
+    <span class="version-badge">v0.1.0</span>
+  </div>
+  <p>Zero-copy iframe data transport — Apache Arrow bundled, no setup required</p>
 </header>
 
-<div class="grid">
+<!-- ════════════════════════════════════════════
+     LIVE DEMO
+════════════════════════════════════════════ -->
+<div class="section-title">Live demo</div>
 
-  <!-- ═══ PARENT PANEL ═══ -->
+<div class="demo-grid">
+
+  <!-- Parent panel -->
   <div class="card">
     <div class="card-head">
       <div class="state-dot CONNECTING" id="parent-dot"></div>
@@ -257,65 +347,65 @@
       <span class="state-label" id="parent-state">CONNECTING</span>
     </div>
 
-    <!-- Handshake steps -->
     <div class="handshake">
-      <span class="hs-step" id="hs-child-ready">
-        <span class="hs-icon">⬜</span> CHILD_READY
-      </span>
+      <span class="hs-step" id="hs-child-ready"><span class="hs-icon">⬜</span> CHILD_READY</span>
       <span class="hs-arrow" id="hs-arrow-1">→</span>
-      <span class="hs-step" id="hs-parent-ack">
-        <span class="hs-icon">⬜</span> PARENT_ACK
-      </span>
+      <span class="hs-step" id="hs-parent-ack"><span class="hs-icon">⬜</span> PARENT_ACK</span>
       <span class="hs-arrow" id="hs-arrow-2">→</span>
-      <span class="hs-step" id="hs-connected">
-        <span class="hs-icon">⬜</span> Connected
-      </span>
+      <span class="hs-step" id="hs-connected"><span class="hs-icon">⬜</span> Connected</span>
     </div>
 
     <div class="stats">
-      <div class="stat">
-        <div class="stat-val" id="stat-sent">0</div>
-        <div class="stat-key">Sent</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" id="stat-acked">0</div>
-        <div class="stat-key">ACKed</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" id="stat-rtt">—</div>
-        <div class="stat-key">RTT ms</div>
-      </div>
+      <div class="stat"><div class="stat-val" id="stat-sent">0</div><div class="stat-key">Sent</div></div>
+      <div class="stat"><div class="stat-val" id="stat-acked">0</div><div class="stat-key">ACKed</div></div>
+      <div class="stat"><div class="stat-val" id="stat-rtt">—</div><div class="stat-key">RTT ms</div></div>
     </div>
 
     <div class="controls">
+      <button class="btn-star" id="btn-auto" disabled>
+        <span class="btn-label">send() — auto</span>
+        <span class="btn-hint">picks best format automatically ⭐</span>
+      </button>
       <button class="btn-blue" id="btn-json" disabled>
-        <span class="btn-label">Send JSON</span>
+        <span class="btn-label">sendJSON()</span>
         <span class="btn-hint">3 rows × 3 cols</span>
       </button>
       <button class="btn-grey" id="btn-copy" disabled>
-        <span class="btn-label">Send Arrow (copy)</span>
-        <span class="btn-hint">Uint8Array via postMessage</span>
+        <span class="btn-label">sendArrowCopy()</span>
+        <span class="btn-hint">Arrow IPC via postMessage</span>
       </button>
-      <button class="btn-grey" id="btn-zerocopy" disabled id="btn-zerocopy">
-        <span class="btn-label">Send Arrow (zero-copy)</span>
+      <button class="btn-grey" id="btn-zerocopy" disabled>
+        <span class="btn-label">sendArrowZeroCopy()</span>
         <span class="btn-hint">SharedArrayBuffer — requires COOP/COEP</span>
       </button>
       <button class="btn-red" id="btn-close">
-        <span class="btn-label">Close connection</span>
+        <span class="btn-label">close()</span>
+        <span class="btn-hint">cleanup resources</span>
       </button>
     </div>
 
     <div class="sab-notice" id="sab-notice">Checking SharedArrayBuffer…</div>
-
     <div class="log" id="parent-log"></div>
   </div>
 
-  <!-- ═══ CHILD PANEL ═══ -->
+  <!-- Child panel -->
   <div class="card">
     <div class="card-head">
       <div class="state-dot CONNECTING" id="child-dot"></div>
       Child iframe —
       <span class="state-label" id="child-state">CONNECTING</span>
+    </div>
+
+    <!-- Listen mode selector -->
+    <div class="mode-selector">
+      <label>Listen mode:</label>
+      <div class="mode-radio">
+        <input type="radio" name="listen-mode" id="mode-cont" value="continuous" checked>
+        <label for="mode-cont">CONTINUOUS</label>
+        <input type="radio" name="listen-mode" id="mode-first" value="first">
+        <label for="mode-first">FIRST_MESSAGE</label>
+      </div>
+      <button class="resume-btn" id="btn-resume" disabled title="Call resumeListening() in child">▶ resumeListening()</button>
     </div>
 
     <div class="log" id="child-log"></div>
@@ -330,18 +420,385 @@
 
 </div>
 
+<!-- ════════════════════════════════════════════
+     CODE EXAMPLES
+════════════════════════════════════════════ -->
+<div class="api-section">
+  <div class="section-title">Code examples</div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="tab-auto">send() — auto</button>
+    <button class="tab" data-tab="tab-json">sendJSON()</button>
+    <button class="tab" data-tab="tab-arrow">sendArrowCopy()</button>
+    <button class="tab" data-tab="tab-zerocopy">sendArrowZeroCopy()</button>
+    <button class="tab" data-tab="tab-child-cont">Child — CONTINUOUS</button>
+    <button class="tab" data-tab="tab-child-first">Child — FIRST_MESSAGE</button>
+  </div>
+
+  <!-- send() auto -->
+  <div class="tab-panel active" id="tab-auto">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">
+          <span class="badge badge-star">⭐ recommended</span>
+          Parent — send() picks the best format automatically
+        </span>
+        <button class="copy-btn" data-target="code-auto">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="code-auto"><span class="kw">import</span> { <span class="obj">ArrowParentEmitter</span>, <span class="fn">tableFromArrays</span>, <span class="fn">tableToIPC</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="kw">const</span> emitter = <span class="kw">new</span> <span class="obj">ArrowParentEmitter</span>(iframe);
+
+emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
+  <span class="cm">// ── send() detects the type automatically ───────────────────</span>
+  <span class="cm">// Uint8Array + SAB available  → sendArrowZeroCopy (zero-copy ⚡)</span>
+  <span class="cm">// Uint8Array + no SAB         → sendArrowCopy (postMessage)</span>
+  <span class="cm">// anything else               → sendJSON</span>
+
+  <span class="cm">// Arrow table → zero-copy if supported, copy otherwise</span>
+  <span class="kw">const</span> table = <span class="fn">tableFromArrays</span>({
+    id:    [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+    name:  [<span class="str">'Alice'</span>, <span class="str">'Bob'</span>, <span class="str">'Charlie'</span>],
+    score: [<span class="num">95.5</span>, <span class="num">87.3</span>, <span class="num">92.1</span>],
+  });
+  <span class="kw">const</span> ack = <span class="kw">await</span> emitter.<span class="fn">send</span>(<span class="fn">tableToIPC</span>(table));
+  console.<span class="fn">log</span>(<span class="str">'zeroCopy:'</span>, ack.isZeroCopy); <span class="cm">// true if SAB available</span>
+
+  <span class="cm">// JSON → always uses sendJSON</span>
+  <span class="kw">await</span> emitter.<span class="fn">send</span>({ userId: <span class="num">42</span>, action: <span class="str">'refresh'</span> });
+
+  <span class="cm">// Force a specific format via options</span>
+  <span class="kw">await</span> emitter.<span class="fn">send</span>(buf, { format: <span class="str">'arrow-copy'</span> });
+});</pre>
+    </div>
+  </div>
+
+  <!-- sendJSON -->
+  <div class="tab-panel" id="tab-json">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label"><span class="badge badge-parent">parent</span> sendJSON()</span>
+        <button class="copy-btn" data-target="code-json">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="code-json"><span class="kw">import</span> { <span class="obj">ArrowParentEmitter</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="kw">const</span> emitter = <span class="kw">new</span> <span class="obj">ArrowParentEmitter</span>(iframe, {
+  handshakeTimeout: <span class="num">5000</span>,   <span class="cm">// ms before giving up on handshake</span>
+  ackTimeout:       <span class="num">3000</span>,   <span class="cm">// ms to wait for DATA_RECEIVED ack</span>
+  allowedOrigins:   [<span class="str">'https://my-app.com'</span>],
+});
+
+emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
+  <span class="kw">const</span> ack = <span class="kw">await</span> emitter.<span class="fn">sendJSON</span>(
+    [
+      { id: <span class="num">1</span>, name: <span class="str">'Alice'</span>,   score: <span class="num">95.5</span> },
+      { id: <span class="num">2</span>, name: <span class="str">'Bob'</span>,     score: <span class="num">87.3</span> },
+      { id: <span class="num">3</span>, name: <span class="str">'Charlie'</span>, score: <span class="num">92.1</span> },
+    ],
+    {
+      correlationId: <span class="str">'query-42'</span>,  <span class="cm">// trace requests end-to-end</span>
+      ttl:           <span class="num">30_000</span>,       <span class="cm">// discard if not processed within 30s</span>
+      priority:      <span class="num">1</span>,
+    }
+  );
+  console.<span class="fn">log</span>(<span class="str">`✅ rows=<span class="op">${</span>ack.rows<span class="op">}</span> time=<span class="op">${</span>ack.processingTime<span class="op">}</span>ms`</span>);
+});</pre>
+    </div>
+  </div>
+
+  <!-- sendArrowCopy -->
+  <div class="tab-panel" id="tab-arrow">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label"><span class="badge badge-parent">parent</span> sendArrowCopy() — Arrow IPC via postMessage</span>
+        <button class="copy-btn" data-target="code-arrow">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="code-arrow"><span class="kw">import</span> { <span class="obj">ArrowParentEmitter</span>, <span class="fn">tableFromArrays</span>, <span class="fn">tableToIPC</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="cm">// Build an Arrow table — Apache Arrow is already included, no extra import</span>
+<span class="kw">const</span> table = <span class="fn">tableFromArrays</span>({
+  id:     Int32Array.<span class="fn">from</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]),
+  value:  Float64Array.<span class="fn">from</span>([<span class="num">1.1</span>, <span class="num">2.2</span>, <span class="num">3.3</span>, <span class="num">4.4</span>, <span class="num">5.5</span>]),
+  label:  [<span class="str">'a'</span>, <span class="str">'b'</span>, <span class="str">'c'</span>, <span class="str">'d'</span>, <span class="str">'e'</span>],
+});
+
+<span class="cm">// Serialize to Arrow IPC format (Uint8Array)</span>
+<span class="kw">const</span> ipcBuffer = <span class="fn">tableToIPC</span>(table);
+
+emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
+  <span class="kw">const</span> ack = <span class="kw">await</span> emitter.<span class="fn">sendArrowCopy</span>(ipcBuffer, {
+    schema: table.schema.<span class="fn">toString</span>(),
+    correlationId: <span class="str">'batch-001'</span>,
+  });
+  console.<span class="fn">log</span>(<span class="str">`rows=<span class="op">${</span>ack.rows<span class="op">}</span> cols=<span class="op">${</span>ack.cols<span class="op">}</span> zeroCopy=<span class="op">${</span>ack.isZeroCopy<span class="op">}</span>`</span>);
+  <span class="cm">// zeroCopy is always false with sendArrowCopy</span>
+});</pre>
+    </div>
+  </div>
+
+  <!-- sendArrowZeroCopy -->
+  <div class="tab-panel" id="tab-zerocopy">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label"><span class="badge badge-parent">parent</span> sendArrowZeroCopy() — SharedArrayBuffer, zero memory copy ⚡</span>
+        <button class="copy-btn" data-target="code-zerocopy">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="code-zerocopy"><span class="kw">import</span> { <span class="obj">ArrowParentEmitter</span>, <span class="fn">tableFromArrays</span>, <span class="fn">tableToIPC</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="cm">// Requires COOP + COEP HTTP headers on both pages:</span>
+<span class="cm">// Cross-Origin-Opener-Policy: same-origin</span>
+<span class="cm">// Cross-Origin-Embedder-Policy: require-corp</span>
+
+<span class="kw">const</span> emitter = <span class="kw">new</span> <span class="obj">ArrowParentEmitter</span>(iframe);
+
+emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
+  <span class="kw">if</span> (!emitter.<span class="fn">isSABSupported</span>()) {
+    console.<span class="fn">warn</span>(<span class="str">'SharedArrayBuffer unavailable — falling back to copy mode'</span>);
+    <span class="kw">return</span>;
+  }
+
+  <span class="kw">const</span> table = <span class="fn">tableFromArrays</span>({ x: Float64Array.<span class="fn">from</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]) });
+  <span class="kw">const</span> ack   = <span class="kw">await</span> emitter.<span class="fn">sendArrowZeroCopy</span>(<span class="fn">tableToIPC</span>(table));
+
+  console.<span class="fn">log</span>(ack.isZeroCopy); <span class="cm">// true — no memory copy occurred ⚡</span>
+});</pre>
+    </div>
+  </div>
+
+  <!-- Child — CONTINUOUS -->
+  <div class="tab-panel" id="tab-child-cont">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">
+          <span class="badge badge-child">child iframe</span>
+          ListenMode.CONTINUOUS — always processes the latest message
+        </span>
+        <button class="copy-btn" data-target="code-child-cont">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="code-child-cont"><span class="kw">import</span> { <span class="obj">ArrowChildReceiver</span>, <span class="obj">ListenMode</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="cm">// CONTINUOUS: keeps listening after each message.</span>
+<span class="cm">// If messages arrive faster than processing, only the LATEST is kept</span>
+<span class="cm">// (buffer of 2). Use listenDelay to debounce rapid sends.</span>
+<span class="kw">const</span> receiver = <span class="kw">new</span> <span class="obj">ArrowChildReceiver</span>({
+  listenMode:  <span class="obj">ListenMode</span>.CONTINUOUS,
+  listenDelay: <span class="num">100</span>,   <span class="cm">// debounce: wait 100ms before processing, keep only latest</span>
+  allowedOrigins: [<span class="str">'https://parent-app.com'</span>],
+});
+
+receiver
+  .<span class="fn">onData</span>((result) => {
+    <span class="cm">// result.format: 'json' | 'arrow-copy' | 'arrow-zerocopy'</span>
+    <span class="kw">if</span> (result.format === <span class="str">'json'</span>) {
+      console.<span class="fn">log</span>(result.data);        <span class="cm">// plain JS object/array</span>
+    } <span class="kw">else</span> {
+      console.<span class="fn">log</span>(result.table);       <span class="cm">// Apache Arrow Table</span>
+      console.<span class="fn">log</span>(result.isZeroCopy);  <span class="cm">// true = zero-copy ⚡</span>
+    }
+    console.<span class="fn">log</span>(<span class="str">`rows=<span class="op">${</span>result.rows<span class="op">}</span> cols=<span class="op">${</span>result.cols<span class="op">}</span> time=<span class="op">${</span>result.processingTime<span class="op">}</span>ms`</span>);
+  })
+  .<span class="fn">onStateChange</span>((next, prev) => console.<span class="fn">log</span>(prev, <span class="str">'→'</span>, next))
+  .<span class="fn">onError</span>((err) => console.<span class="fn">error</span>(err));</pre>
+    </div>
+  </div>
+
+  <!-- Child — FIRST_MESSAGE -->
+  <div class="tab-panel" id="tab-child-first">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">
+          <span class="badge badge-child">child iframe</span>
+          ListenMode.FIRST_MESSAGE — processes one message then pauses
+        </span>
+        <button class="copy-btn" data-target="code-child-first">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="code-child-first"><span class="kw">import</span> { <span class="obj">ArrowChildReceiver</span>, <span class="obj">ListenMode</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="cm">// FIRST_MESSAGE: stops listening automatically after the first message.</span>
+<span class="cm">// Ideal for one-shot data loads (init data, config, etc.).</span>
+<span class="cm">// Call resumeListening() when ready to accept the next one.</span>
+<span class="kw">const</span> receiver = <span class="kw">new</span> <span class="obj">ArrowChildReceiver</span>({
+  listenMode: <span class="obj">ListenMode</span>.FIRST_MESSAGE,
+  allowedOrigins: [<span class="str">'https://parent-app.com'</span>],
+});
+
+receiver.<span class="fn">onData</span>(<span class="kw">async</span> (result) => {
+  <span class="cm">// Fires once. Subsequent sends from parent are ignored until resume.</span>
+  <span class="kw">await</span> <span class="fn">renderDashboard</span>(result.table);
+
+  <span class="cm">// Signal parent we're ready for next payload</span>
+  <span class="fn">notifyParentReady</span>();
+
+  <span class="cm">// Re-enable listening for the next message</span>
+  receiver.<span class="fn">resumeListening</span>();
+});
+
+<span class="cm">// ── Parent side ─────────────────────────────────────────────</span>
+<span class="cm">// The parent doesn't need to know about the child's listen mode.</span>
+<span class="cm">// It just calls send() as usual; the child controls its own rate.</span>
+emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
+  <span class="kw">await</span> emitter.<span class="fn">send</span>(<span class="fn">tableToIPC</span>(initialTable));  <span class="cm">// processed</span>
+  <span class="kw">await</span> emitter.<span class="fn">send</span>(<span class="fn">tableToIPC</span>(anotherTable));  <span class="cm">// ignored until resume</span>
+});</pre>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     METHOD REFERENCE
+════════════════════════════════════════════ -->
+<div class="api-section">
+  <div class="section-title">API reference</div>
+
+  <div class="method-grid">
+
+    <!-- ArrowParentEmitter -->
+    <div class="method-card">
+      <div class="method-card-head">
+        <span style="color:var(--accent)">ArrowParentEmitter</span>
+        <span style="color:var(--muted);font-weight:400;font-size:.68rem">( iframe, config? )</span>
+      </div>
+      <ul class="method-list">
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">send</span>(data, opts?)</span>
+          <span class="method-desc">Auto-selects best format — zero-copy → copy → JSON</span>
+          <span class="star-badge">⭐ auto</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">sendJSON</span>(data, opts?)</span>
+          <span class="method-desc">Send any JSON-serialisable value</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">sendArrowCopy</span>(buf, opts?)</span>
+          <span class="method-desc">Arrow IPC Uint8Array via postMessage (universal)</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">sendArrowZeroCopy</span>(buf, opts?)</span>
+          <span class="method-desc">Arrow IPC via SharedArrayBuffer — no memory copy ⚡</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">onReady</span>(cb)</span>
+          <span class="method-desc">Fires once handshake complete — chain calls</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">onStateChange</span>(cb)</span>
+          <span class="method-desc">cb(newState, oldState) on every transition</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">onError</span>(cb)</span>
+          <span class="method-desc">Handshake timeout, ACK timeout, version mismatch</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">isReady</span>()</span>
+          <span class="method-desc">Returns <code>true</code> when state is READY</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">isSABSupported</span>()</span>
+          <span class="method-desc">Returns <code>true</code> if SharedArrayBuffer is available</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">getState</span>()</span>
+          <span class="method-desc">INIT · CONNECTING · READY · SENDING · ERROR · CLOSED</span>
+        </li>
+        <li class="method-item">
+          <span class="method-sig"><span class="m-fn">close</span>()</span>
+          <span class="method-desc">Reject pending ACKs, cleanup listeners</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ArrowChildReceiver + Arrow re-exports -->
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div class="method-card">
+        <div class="method-card-head">
+          <span style="color:var(--purple)">ArrowChildReceiver</span>
+          <span style="color:var(--muted);font-weight:400;font-size:.68rem">( config? )</span>
+        </div>
+        <ul class="method-list">
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">onData</span>(cb)</span>
+            <span class="method-desc">cb(result) — result.table (Arrow) or result.data (JSON)</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">onStateChange</span>(cb)</span>
+            <span class="method-desc">cb(newState, oldState)</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">onError</span>(cb)</span>
+            <span class="method-desc">Parse errors, version mismatches</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">resumeListening</span>()</span>
+            <span class="method-desc">Re-enable after FIRST_MESSAGE mode</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">isReady</span>() / <span class="m-fn">getState</span>()</span>
+            <span class="method-desc">Same states as emitter</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">close</span>()</span>
+            <span class="method-desc">Cleanup, clear buffer and intervals</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="method-card">
+        <div class="method-card-head">
+          <span style="color:var(--orange)">Apache Arrow</span>
+          <span style="color:var(--muted);font-weight:400;font-size:.68rem">re-exported from iframe-flight</span>
+        </div>
+        <ul class="method-list">
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">tableFromArrays</span>(cols)</span>
+            <span class="method-desc">Create an Arrow table from typed/JS arrays</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">tableToIPC</span>(table)</span>
+            <span class="method-desc">Serialize Arrow table → Uint8Array IPC buffer</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-fn">tableFromIPC</span>(buf)</span>
+            <span class="method-desc">Deserialize IPC buffer → Arrow Table (used internally)</span>
+          </li>
+          <li class="method-item">
+            <span class="method-sig"><span class="m-ty">Table</span>, <span class="m-ty">Schema</span>, <span class="m-ty">Field</span> …</span>
+            <span class="method-desc">Full Apache Arrow types available</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <footer>
   <p>
-    Source:
     <a href="https://github.com/ihatexcel/iframe-flight" target="_blank">github.com/ihatexcel/iframe-flight</a>
-    — SharedArrayBuffer zero-copy requires
-    <code>Cross-Origin-Opener-Policy: same-origin</code> +
-    <code>Cross-Origin-Embedder-Policy: require-corp</code> headers
-    (not set by GitHub Pages by default).
+    — Zero-copy requires <code>Cross-Origin-Opener-Policy: same-origin</code> +
+    <code>Cross-Origin-Embedder-Policy: require-corp</code> (not set by GitHub Pages).
   </p>
 </footer>
 
-<!-- iframe-flight IIFE — exposes window.ArrowBridge (Arrow bundled inside) -->
+<!-- iframe-flight IIFE — window.ArrowBridge (Arrow bundled inside) -->
 <script src="./iframe-flight.iife.js"></script>
 <script>
 (function () {
@@ -350,16 +807,15 @@
   const { ArrowParentEmitter, State, tableFromArrays, tableToIPC } = window.ArrowBridge;
 
   /* ── Counters ── */
-  let sent = 0;
-  let acked = 0;
+  var sent = 0, acked = 0;
 
   /* ── DOM helpers ── */
   function q(id) { return document.getElementById(id); }
 
   function log(panelId, msg, type) {
-    const panel = q(panelId);
-    const now = new Date().toISOString().slice(11, 23);
-    const row = document.createElement('div');
+    var panel = q(panelId);
+    var now   = new Date().toISOString().slice(11, 23);
+    var row   = document.createElement('div');
     row.className = 'log-row' + (type ? ' ' + type : '');
     row.innerHTML =
       '<span class="log-ts">' + now + '</span>' +
@@ -369,10 +825,7 @@
   }
 
   function escHtml(s) {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function setParentState(s) {
@@ -385,7 +838,6 @@
     q('child-state').textContent = s;
   }
 
-  /* ── Handshake UI ── */
   function hsStep(id, arrowId) {
     var el = q(id);
     el.className = 'hs-step done';
@@ -393,17 +845,24 @@
     if (arrowId) q(arrowId).className = 'hs-arrow done';
   }
 
-  /* ── Emitter setup ── */
-  const iframe = q('child-frame');
+  function makeArrowBuf() {
+    var table = tableFromArrays({
+      id:    [1, 2, 3, 4, 5],
+      label: ['alpha', 'beta', 'gamma', 'delta', 'epsilon'],
+      value: [1.1, 2.2, 3.3, 4.4, 5.5],
+    });
+    return { buf: tableToIPC(table), schema: table.schema.toString() };
+  }
 
-  const emitter = new ArrowParentEmitter(iframe, {
+  /* ── Emitter ── */
+  var iframe  = q('child-frame');
+  var emitter = new ArrowParentEmitter(iframe, {
     handshakeTimeout: 8000,
     ackTimeout: 5000,
     allowedOrigins: ['*'],
   });
 
-  /* SAB info */
-  var sabOk = emitter.isSABSupported();
+  var sabOk  = emitter.isSABSupported();
   var notice = q('sab-notice');
   if (sabOk) {
     notice.textContent = '⚡ SharedArrayBuffer available — zero-copy enabled';
@@ -419,13 +878,11 @@
     .onStateChange(function (next, prev) {
       setParentState(next);
       log('parent-log', 'State: ' + prev + ' → ' + next, 'info');
-
       if (next === State.READY && prev === State.CONNECTING) {
         hsStep('hs-child-ready', 'hs-arrow-1');
-        hsStep('hs-parent-ack', 'hs-arrow-2');
-        hsStep('hs-connected', null);
-        q('btn-json').disabled = false;
-        q('btn-copy').disabled = false;
+        hsStep('hs-parent-ack',  'hs-arrow-2');
+        hsStep('hs-connected',   null);
+        ['btn-auto','btn-json','btn-copy'].forEach(function(id){ q(id).disabled = false; });
         if (sabOk) q('btn-zerocopy').disabled = false;
       }
     })
@@ -436,75 +893,142 @@
       log('parent-log', '❌ ' + err.message, 'err');
     });
 
-  /* ── Send helpers ── */
+  /* ── Send helper ── */
   function doSend(label, fn) {
     sent++;
     q('stat-sent').textContent = sent;
     log('parent-log', '→ Sending ' + label + '…');
     var t0 = performance.now();
-
     fn().then(function (ack) {
       var rtt = Math.round(performance.now() - t0);
       acked++;
       q('stat-acked').textContent = acked;
-      q('stat-rtt').textContent = rtt;
+      q('stat-rtt').textContent   = rtt;
       log('parent-log',
         '✅ ACK  rows=' + ack.rows + '  cols=' + ack.cols +
-        '  procTime=' + ack.processingTime + 'ms  zeroCopy=' + ack.isZeroCopy,
-        'ok');
+        '  proc=' + ack.processingTime + 'ms  zeroCopy=' + ack.isZeroCopy, 'ok');
     }).catch(function (err) {
       log('parent-log', '❌ ' + err.message, 'err');
     });
   }
 
+  q('btn-auto').addEventListener('click', function () {
+    doSend('send() auto — Arrow IPC', function () {
+      var a = makeArrowBuf();
+      // send() will pick zero-copy if SAB available, copy otherwise
+      return emitter.send(a.buf, { format: 'auto', schema: a.schema });
+    });
+  });
+
   q('btn-json').addEventListener('click', function () {
-    doSend('JSON (3×3)', function () {
-      return emitter.sendJSON([
-        { id: 1, name: 'Alice',   score: 95.5 },
-        { id: 2, name: 'Bob',     score: 87.3 },
-        { id: 3, name: 'Charlie', score: 92.1 },
-      ], { correlationId: 'demo-json-' + Date.now() });
+    doSend('sendJSON()', function () {
+      return emitter.sendJSON(
+        [{ id:1, name:'Alice', score:95.5 }, { id:2, name:'Bob', score:87.3 }, { id:3, name:'Charlie', score:92.1 }],
+        { correlationId: 'demo-json-' + Date.now() }
+      );
     });
   });
 
   q('btn-copy').addEventListener('click', function () {
-    doSend('Arrow copy (IPC)', function () {
-      var table = tableFromArrays({
-        id:    [1, 2, 3, 4, 5],
-        label: ['alpha', 'beta', 'gamma', 'delta', 'epsilon'],
-        value: [1.1, 2.2, 3.3, 4.4, 5.5],
-      });
-      var buf = tableToIPC(table);
-      return emitter.sendArrowCopy(buf, { schema: table.schema.toString() });
+    doSend('sendArrowCopy()', function () {
+      var a = makeArrowBuf();
+      return emitter.sendArrowCopy(a.buf, { schema: a.schema });
     });
   });
 
   q('btn-zerocopy').addEventListener('click', function () {
-    doSend('Arrow zero-copy (IPC)', function () {
-      var table = tableFromArrays({
-        id:    [10, 20, 30],
-        label: ['x', 'y', 'z'],
-        value: [9.9, 8.8, 7.7],
-      });
-      var buf = tableToIPC(table);
-      return emitter.sendArrowZeroCopy(buf);
+    doSend('sendArrowZeroCopy()', function () {
+      var a = makeArrowBuf();
+      return emitter.sendArrowZeroCopy(a.buf);
     });
   });
 
   q('btn-close').addEventListener('click', function () {
     emitter.close();
-    ['btn-json', 'btn-copy', 'btn-zerocopy'].forEach(function (id) {
-      q(id).disabled = true;
-    });
+    ['btn-auto','btn-json','btn-copy','btn-zerocopy'].forEach(function(id){ q(id).disabled = true; });
     log('parent-log', 'Connection closed', 'err');
   });
 
-  /* ── Relay child log messages ── */
+  /* ── Relay child logs ── */
   window.addEventListener('message', function (e) {
     if (!e.data || e.data.__iframeFlight !== 'log') return;
     log('child-log', e.data.msg, e.data.type);
     if (e.data.state) setChildState(e.data.state);
+    // Enable resume button when child is paused (FIRST_MESSAGE mode)
+    if (e.data.msg && e.data.msg.indexOf('Paused') !== -1) {
+      q('btn-resume').disabled = false;
+    }
   });
+
+  /* ── Mode selector — reload iframe with ?mode param ── */
+  function reloadChild() {
+    var mode = document.querySelector('input[name="listen-mode"]:checked').value;
+    q('child-log').innerHTML = '';
+    setChildState('CONNECTING');
+    q('btn-resume').disabled = true;
+    ['btn-auto','btn-json','btn-copy','btn-zerocopy'].forEach(function(id){ q(id).disabled = true; });
+    q('child-frame').src = './child.html' + (mode === 'first' ? '?mode=first' : '');
+    log('parent-log', 'Reloading iframe in ' + (mode === 'first' ? 'FIRST_MESSAGE' : 'CONTINUOUS') + ' mode…', 'info');
+    // Re-init emitter after new iframe loads
+    emitter.close();
+    setTimeout(function () {
+      var newEmitter = new ArrowParentEmitter(q('child-frame'), { handshakeTimeout: 8000, ackTimeout: 5000, allowedOrigins: ['*'] });
+      newEmitter.onStateChange(emitter.onStateChangeCallback || function(){});
+      newEmitter.onReady(function () {
+        log('parent-log', '✅ Handshake complete (new mode)', 'ok');
+        ['btn-auto','btn-json','btn-copy'].forEach(function(id){ q(id).disabled = false; });
+        if (sabOk) q('btn-zerocopy').disabled = false;
+        // reassign global handlers
+        q('btn-auto').onclick   = null; // let event listeners remain
+      });
+      newEmitter.onError(function(err){ log('parent-log', '❌ ' + err.message, 'err'); });
+      // swap reference
+      window.__activeEmitter = newEmitter;
+    }, 100);
+  }
+
+  document.querySelectorAll('input[name="listen-mode"]').forEach(function (radio) {
+    radio.addEventListener('change', reloadChild);
+  });
+
+  /* ── Resume button — sends command to iframe ── */
+  q('btn-resume').addEventListener('click', function () {
+    var frame = q('child-frame');
+    frame.contentWindow.postMessage({ __iframeFlight: 'resume' }, '*');
+    q('btn-resume').disabled = true;
+    log('parent-log', '▶ resumeListening() sent to child', 'info');
+  });
+
+  /* ════════════════════════════════
+     TABS
+  ════════════════════════════════ */
+  document.querySelectorAll('.tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ════════════════════════════════
+     COPY BUTTONS
+  ════════════════════════════════ */
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre    = document.getElementById(btn.dataset.target);
+      var text   = pre.textContent;
+      navigator.clipboard.writeText(text).then(function () {
+        btn.classList.add('copied');
+        btn.lastChild.textContent = ' Copied!';
+        setTimeout(function () {
+          btn.classList.remove('copied');
+          btn.lastChild.textContent = ' Copy';
+        }, 1800);
+      });
+    });
+  });
+
 })();
 </script>
 </body>
