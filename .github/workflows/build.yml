@@ -55,13 +55,14 @@ jobs:
           retention-days: 30
 
       # ── Assemble Pages site ──────────────────────────────────
-      # Structure: docs/ + the IIFE file renamed iframe-flight.iife.js
+      # Structure: docs/ + IIFE (legacy) + ESM (used by demo pages via import map)
       - name: Assemble GitHub Pages site
         run: |
           mkdir -p _site
           cp docs/index.html _site/index.html
           cp docs/child.html _site/child.html
           cp dist/index.iife.js _site/iframe-flight.iife.js
+          cp dist/index.js      _site/iframe-flight.esm.js
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
