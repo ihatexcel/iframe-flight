@@ -939,13 +939,11 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
   </p>
 </footer>
 
-<!-- iframe-flight IIFE — window.ArrowBridge (Arrow bundled inside) -->
-<script src="./iframe-flight.iife.js"></script>
-<script>
-(function () {
-  'use strict';
-
-  const { ArrowParentEmitter, State, tableFromArrays, tableToIPC } = window.ArrowBridge;
+<script type="importmap">
+{"imports": {"iframe-flight": "./iframe-flight.esm.js"}}
+</script>
+<script type="module">
+  import { ArrowParentEmitter, State, tableFromArrays, tableToIPC } from 'iframe-flight';
 
   /* ── Counters ── */
   var sent = 0, acked = 0;
@@ -1352,8 +1350,6 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
       });
     });
   });
-
-})();
 </script>
 </body>
 </html>

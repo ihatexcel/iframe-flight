@@ -140,11 +140,11 @@
 
   <div class="preview" id="preview">No data received yet.</div>
 
-<script src="./iframe-flight.iife.js"></script>
-<script>
-(function () {
-  'use strict';
-  const { ArrowChildReceiver, ListenMode, State } = window.ArrowBridge;
+<script type="importmap">
+{"imports": {"iframe-flight": "./iframe-flight.esm.js"}}
+</script>
+<script type="module">
+  import { ArrowChildReceiver, ListenMode, State } from 'iframe-flight';
 
   const params    = new URLSearchParams(window.location.search);
   const sourceId  = params.get('sourceId') || ('child-' + Math.random().toString(36).slice(2, 7));
@@ -302,7 +302,6 @@
       preview.textContent = 'RELAY from ' + e.data.from + ':\n' + JSON.stringify(e.data.payload, null, 2).slice(0, 250);
     }
   });
-})();
 </script>
 </body>
 </html>
