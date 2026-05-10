@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chart widget — iframe-flight</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5/build/vega.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5/build/vega-lite.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6/build/vega-embed.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #fff; color: #3f3f46; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    #status { display: flex; align-items: center; gap: 6px; padding: 5px 12px; background: #fafafa; border-bottom: 1px solid #e4e4e7; font-size: 11px; color: #71717a; flex-shrink: 0; }
+    #dot { width: 7px; height: 7px; border-radius: 50%; background: #fbbf24; flex-shrink: 0; transition: background 0.3s; }
+    #chart-area { flex: 1; overflow: hidden; position: relative; }
+    #placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; font-size: 13px; }
+    #placeholder svg { opacity: 0.3; }
+    #chart-el { width: 100%; height: 100%; }
+    .vega-embed { width: 100% !important; }
+    .vega-embed .chart-wrapper { width: 100% !important; }
+  </style>
+</head>
+<body>
+
+<div id="status">
+  <div id="dot"></div>
+  <span id="state-txt">CONNECTING</span>
+  <span id="meta" style="margin-left:auto;font-size:10px;font-family:monospace;color:#a1a1aa"></span>
+</div>
+
+<div id="chart-area">
+  <div id="placeholder">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 16V11M12 16V8M17 16v-3"/>
+    </svg>
+    <span>Push a snapshot from the parent</span>
+  </div>
+  <div id="chart-el"></div>
+</div>
+
+<script type="importmap">{"imports": {"iframe-flight": "https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"}}</script>
+<script type="module">
+import { ArrowChildReceiver } from 'iframe-flight';
+
+const dot       = document.getElementById('dot');
+const stateTxt  = document.getElementById('state-txt');
+const metaEl    = document.getElementById('meta');
+const chartEl   = document.getElementById('chart-el');
+const placeholder = document.getElementById('placeholder');
+
+const STATE_COLORS = { READY:'#22c55e', RECEIVING:'#a855f7', ERROR:'#ef4444', CLOSED:'#d4d4d8' };
+
+const receiver = new ArrowChildReceiver({ allowedOrigins: ['*'] });
+
+receiver.onStateChange(next => {
+  dot.style.background = STATE_COLORS[next] || '#fbbf24';
+  stateTxt.textContent = next;
+});
+
+receiver.onData(result => {
+  const rows = extractRows(result);
+  metaEl.textContent = `${result.rows} rows · ${result.size} B · ${result.processingTime}ms`;
+  renderChart(rows);
+});
+
+receiver.onError(err => {
+  metaEl.textContent = `❌ ${err.message}`;
+  stateTxt.textContent = 'ERROR';
+  dot.style.background = '#ef4444';
+});
+
+function extractRows(result) {
+  const rows = [];
+  if (result.table) {
+    const t = result.table;
+    const fields = t.schema.fields;
+    for (let i = 0; i < t.numRows; i++) {
+      const row = {};
+      fields.forEach((f, ci) => {
+        const val = t.getChildAt(ci).get(i);
+        row[f.name] = typeof val === 'bigint' ? Number(val) : val;
+      });
+      rows.push(row);
+    }
+  } else if (result.data) {
+    const d = result.data;
+    rows.push(...(Array.isArray(d) ? d : [d]));
+  }
+  return rows;
+}
+
+async function renderChart(rows) {
+  placeholder.style.display = 'none';
+
+  const containerH = document.getElementById('chart-area').clientHeight;
+  const barH = Math.max(24, Math.floor((containerH - 60) / rows.length));
+  const chartH = rows.length * barH + 40;
+
+  const spec = {
+    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    width: 'container',
+    height: Math.min(chartH, containerH - 20),
+    padding: { top: 8, right: 16, bottom: 8, left: 8 },
+    background: '#ffffff',
+    data: { values: rows },
+    mark: { type: 'bar', cornerRadiusEnd: 5 },
+    encoding: {
+      y: {
+        field: 'product', type: 'ordinal', sort: '-x', title: null,
+        axis: { labelFontSize: 12, labelColor: '#3f3f46', tickColor: '#e4e4e7', domainColor: '#e4e4e7' }
+      },
+      x: {
+        field: 'revenue', type: 'quantitative', title: 'Revenue ($M)',
+        axis: { gridColor: '#f4f4f5', tickColor: '#f4f4f5', labelColor: '#71717a', titleColor: '#71717a', titleFontSize: 11 }
+      },
+      color: {
+        field: 'growth', type: 'quantitative',
+        scale: { scheme: 'redyellowgreen', domain: [-25, 25] },
+        title: 'Growth %',
+        legend: {
+          orient: 'right', direction: 'vertical',
+          labelFontSize: 10, titleFontSize: 10, labelColor: '#71717a', titleColor: '#71717a',
+          format: '+.0f', gradientLength: 80
+        }
+      },
+      tooltip: [
+        { field: 'product', title: 'Product' },
+        { field: 'revenue', title: 'Revenue ($M)', format: '.1f' },
+        { field: 'units',   title: 'Units', format: ',' },
+        { field: 'growth',  title: 'Growth %', format: '+.1f' }
+      ]
+    },
+    config: {
+      font: 'system-ui, -apple-system, sans-serif',
+      view: { stroke: null }
+    }
+  };
+
+  await vegaEmbed(chartEl, spec, { actions: false, renderer: 'svg' });
+}
+</script>
+</body>
+</html>

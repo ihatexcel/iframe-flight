@@ -59,10 +59,12 @@ jobs:
       - name: Assemble GitHub Pages site
         run: |
           mkdir -p _site
-          cp docs/index.html _site/index.html
-          cp docs/child.html _site/child.html
-          cp dist/index.iife.js _site/iframe-flight.iife.js
-          cp dist/index.js      _site/iframe-flight.esm.js
+          cp docs/index.html        _site/index.html
+          cp docs/child.html        _site/child.html
+          cp docs/child-simple.html _site/child-simple.html
+          cp docs/child-chart.html  _site/child-chart.html
+          cp dist/index.iife.js     _site/iframe-flight.iife.js
+          cp dist/index.js          _site/iframe-flight.esm.js
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
