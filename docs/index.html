@@ -196,19 +196,18 @@
   <div class="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-800">
     <span id="inspector-live" class="w-1.5 h-1.5 rounded-full bg-zinc-600 shrink-0"></span>
     <span class="text-[11px] font-bold uppercase tracking-widest text-zinc-500">Message inspector</span>
-    <span id="inspector-dir" class="ml-auto text-[11px] text-zinc-600">awaiting first message…</span>
   </div>
   <div class="px-4 py-3">
     <p id="inspector-empty" class="text-[12px] text-zinc-600 italic">No messages yet. Send data or click Reply in a child iframe.</p>
     <div id="inspector-grid" class="hidden grid grid-cols-6 gap-x-4 gap-y-3">
-      <!-- direction row spans full width -->
-      <div class="col-span-6 flex items-center gap-2 pb-2.5 border-b border-zinc-800 text-[12px] text-zinc-500">
-        Direction:
-        <span id="insp-source" class="font-mono font-bold text-zinc-300">—</span>
-        <span class="text-zinc-700">→</span>
-        <span id="insp-target" class="font-mono font-bold text-zinc-300">—</span>
+      <div class="flex flex-col gap-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Source</span>
+        <span id="insp-source" class="font-mono text-[11px] text-zinc-300">—</span>
       </div>
-      <!-- fields -->
+      <div class="flex flex-col gap-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Receiver</span>
+        <span id="insp-receiver" class="font-mono text-[11px] text-zinc-300">—</span>
+      </div>
       <div class="flex flex-col gap-1">
         <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Message ID</span>
         <span id="insp-msgid" class="font-mono text-[11px] text-blue-400 truncate">—</span>
@@ -252,10 +251,6 @@
       <div class="flex flex-col gap-1">
         <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Received at</span>
         <span id="insp-recvat" class="font-mono text-[11px] text-zinc-500">—</span>
-      </div>
-      <div class="flex flex-col gap-1">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Receiver</span>
-        <span id="insp-receiver" class="font-mono text-[11px] text-zinc-300">—</span>
       </div>
     </div>
   </div>
@@ -673,17 +668,10 @@ function updateInspector(meta, from, to) {
   live.style.boxShadow  = '0 0 4px #22c55e';
   setTimeout(() => { live.style.background = '#52525b'; live.style.boxShadow = 'none'; }, 1200);
 
-  const colorFor = id => id === 'child-alpha' ? 'text-blue-400' : id === 'child-beta' ? 'text-purple-400' : 'text-green-400';
-  const srcEl = q('insp-source');
-  srcEl.textContent = from || '—';
-  srcEl.className   = `font-mono font-bold text-sm ${colorFor(from)}`;
-  const tgtEl = q('insp-target');
-  tgtEl.textContent = to || '—';
-  tgtEl.className   = `font-mono font-bold text-sm ${colorFor(to)}`;
-  q('inspector-dir').textContent = `${from||'?'} → ${to||'?'}`;
-
   const set = (id, val) => { q(id).textContent = (val !== undefined && val !== null) ? String(val) : '—'; };
-  set('insp-msgid',   meta.messageId ? meta.messageId.slice(0,28)+'…' : '—');
+  set('insp-source',  from || meta.source);
+  set('insp-receiver', meta.receiver || to);
+  set('insp-msgid',   meta.messageId || '—');
   set('insp-ts',      meta.timestamp ? new Date(meta.timestamp).toISOString().slice(11,23) : '—');
   set('insp-format',  meta.format);
   set('insp-rows',    meta.rows !== undefined ? meta.rows : '—');
@@ -697,7 +685,6 @@ function updateInspector(meta, from, to) {
   q('insp-schema').textContent = schema.length > 35 ? schema.slice(0,33)+'…' : schema;
   q('insp-schema').title       = schema;
   set('insp-recvat',  meta.receivedAt ? new Date(meta.receivedAt).toISOString().slice(11,23) : '—');
-  set('insp-receiver', meta.receiver || to || '—');
 }
 
 /* ══════════════════════════════
