@@ -1,56 +1,56 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>iframe-flight child</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-    .blink { animation: blink 1.2s ease-in-out infinite; }
-    ::-webkit-scrollbar { width:4px } ::-webkit-scrollbar-thumb { background:#3f3f46; border-radius:2px }
+    /* only what Tailwind can't express */
+    .kw{color:#cf222e}.fn{color:#8250df}.str{color:#0a3069}
+    .cm{color:#6e7781;font-style:italic}.num{color:#0550ae}.obj{color:#953800}
   </style>
 </head>
-<body class="bg-zinc-950 text-zinc-300 h-screen flex flex-col overflow-hidden text-[12.5px] font-sans">
+<body class="bg-zinc-50 text-zinc-700 h-screen flex flex-col overflow-hidden text-[12.5px] font-sans">
 
   <!-- Status bar -->
-  <header class="flex items-center gap-2 px-3 py-2 bg-zinc-900 border-b border-zinc-800 shrink-0">
-    <span id="dot" class="w-2 h-2 rounded-full bg-yellow-400 blink shrink-0"></span>
-    <span id="state-txt" class="font-semibold text-zinc-200 text-xs tracking-wide">CONNECTING</span>
-    <code id="source-id-chip" class="font-mono text-[11px] font-bold px-1.5 py-px rounded bg-blue-950/60 text-blue-400 border border-blue-900/50 leading-none">…</code>
+  <header class="flex items-center gap-2 px-3 py-2 bg-white border-b border-zinc-200 shrink-0">
+    <span id="dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+    <span id="state-txt" class="font-semibold text-zinc-800 text-xs tracking-wide">CONNECTING</span>
+    <code id="source-id-chip" class="font-mono text-[11px] font-bold px-1.5 py-px rounded bg-blue-50 text-blue-700 border border-blue-200 leading-none">…</code>
     <span id="mode-badge" class="text-[10px] font-bold px-1.5 py-px rounded leading-none"></span>
     <div class="ml-auto flex items-center gap-1.5 text-[11px] text-zinc-500">
-      <span id="listen-dot" class="w-1.5 h-1.5 rounded-full bg-green-500" style="box-shadow:0 0 4px #22c55e"></span>
+      <span id="listen-dot" class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
       <span id="listen-label">listening</span>
     </div>
   </header>
 
   <!-- Handshake -->
-  <div class="flex items-center gap-1 px-3 py-1 border-b border-zinc-800 text-[11px] text-zinc-600 shrink-0 font-mono">
+  <div class="flex items-center gap-1 px-3 py-1 border-b border-zinc-200 text-[11px] text-zinc-400 shrink-0 font-mono">
     <span id="hs-sent">⬜ CHILD_READY</span>
-    <span class="text-zinc-800 mx-1">→</span>
+    <span class="text-zinc-300 mx-1">→</span>
     <span id="hs-ack">⬜ PARENT_ACK</span>
-    <span class="text-zinc-800 mx-1">→</span>
+    <span class="text-zinc-300 mx-1">→</span>
     <span id="hs-ready">⬜ Ready</span>
   </div>
 
   <!-- Log -->
-  <div id="log" class="flex-1 overflow-y-auto px-3 py-2 font-mono text-[11px] flex flex-col gap-px leading-relaxed"></div>
+  <div id="log" class="flex-1 overflow-y-auto px-3 py-2 font-mono text-[11px] flex flex-col gap-px leading-relaxed bg-white"></div>
 
   <!-- Controls -->
-  <div class="px-3 py-2 border-t border-zinc-800 flex items-center gap-2 shrink-0">
-    <span class="text-[11px] text-zinc-500">↑ Reverse channel:</span>
+  <div class="px-3 py-2 border-t border-zinc-200 flex items-center gap-2 bg-white shrink-0">
+    <span class="text-[11px] text-zinc-400">↑ Reverse channel:</span>
     <button id="btn-reply" disabled
       class="px-2.5 py-1 text-[11px] font-semibold rounded border
-             bg-purple-950/60 text-purple-300 border-purple-900/60
-             hover:bg-purple-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+             bg-purple-50 text-purple-700 border-purple-200
+             hover:bg-purple-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
       Reply to parent
     </button>
   </div>
 
   <!-- Preview -->
   <div id="preview"
-    class="px-3 py-2 border-t border-zinc-800 font-mono text-[11px] text-zinc-600 max-h-14 overflow-auto shrink-0 whitespace-pre-wrap break-all">
+    class="px-3 py-2 border-t border-zinc-200 font-mono text-[11px] text-zinc-400 max-h-14 overflow-auto shrink-0 whitespace-pre-wrap break-all bg-zinc-50">
     No data received yet.
   </div>
 
@@ -67,13 +67,13 @@ const listenMode = isFirst ? ListenMode.FIRST_MESSAGE : ListenMode.CONTINUOUS;
 const q = id => document.getElementById(id);
 
 function log(msg, type) {
-  const panel = q('log');
-  const row   = document.createElement('div');
+  const colors = { ok:'text-green-700', err:'text-red-600', info:'text-blue-700', recv:'text-purple-700', warn:'text-amber-700' };
+  const row = document.createElement('div');
   row.className = 'flex gap-2';
-  const colors = { ok:'text-green-400', err:'text-red-400', info:'text-blue-400', recv:'text-purple-400', warn:'text-amber-400' };
   row.innerHTML =
-    `<span class="text-zinc-600 shrink-0">${new Date().toISOString().slice(11,23)}</span>` +
-    `<span class="${colors[type] || 'text-zinc-400'}">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+    `<span class="text-zinc-400 shrink-0">${new Date().toISOString().slice(11,23)}</span>` +
+    `<span class="${colors[type]||'text-zinc-600'}">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+  const panel = q('log');
   panel.appendChild(row);
   panel.scrollTop = panel.scrollHeight;
 }
@@ -82,41 +82,38 @@ function relay(msg, type, state, meta) {
   try { window.parent.postMessage({ __iframeFlight:'log', msg, type, state, sourceId, meta }, '*'); } catch(_){}
 }
 
-// Init
 q('source-id-chip').textContent = sourceId;
 const badge = q('mode-badge');
 if (isFirst) {
   badge.textContent = 'FIRST_MESSAGE';
-  badge.className += ' bg-amber-950/60 text-amber-400 border border-amber-900/50';
+  badge.className += ' bg-amber-50 text-amber-700 border border-amber-200';
 } else {
   badge.textContent = 'CONTINUOUS' + (delay ? ` ${delay}ms` : '');
-  badge.className += ' bg-green-950/60 text-green-400 border border-green-900/50';
+  badge.className += ' bg-green-50 text-green-700 border border-green-200';
 }
 
 function setDot(s) {
   const cfg = {
-    READY:     { bg:'bg-green-500',  glow:'0 0 5px #22c55e', anim:false },
-    RECEIVING: { bg:'bg-purple-500', glow:'0 0 5px #a855f7', anim:false },
-    ERROR:     { bg:'bg-red-500',    glow:'none',             anim:false },
-    CLOSED:    { bg:'bg-zinc-600',   glow:'none',             anim:false },
-  }[s] || { bg:'bg-yellow-400', glow:'none', anim:true };
+    READY:     { bg:'#22c55e', anim:false },
+    RECEIVING: { bg:'#a855f7', anim:false },
+    ERROR:     { bg:'#ef4444', anim:false },
+    CLOSED:    { bg:'#d4d4d8', anim:false },
+  }[s] || { bg:'#fbbf24', anim:true };
   const el = q('dot');
-  el.className = `w-2 h-2 rounded-full shrink-0 ${cfg.bg}${cfg.anim ? ' blink' : ''}`;
-  el.style.boxShadow = cfg.glow;
+  el.style.background = cfg.bg;
+  el.className = `w-2 h-2 rounded-full shrink-0${cfg.anim ? ' animate-pulse' : ''}`;
   q('state-txt').textContent = s;
 }
 
 function setListenActive(active) {
-  const d = q('listen-dot');
-  d.style.background   = active ? '#22c55e' : '#52525b';
-  d.style.boxShadow    = active ? '0 0 4px #22c55e' : 'none';
-  q('listen-label').textContent = active ? 'listening' : 'paused';
+  q('listen-dot').style.background = active ? '#22c55e' : '#d4d4d8';
+  q('listen-label').textContent     = active ? 'listening' : 'paused';
 }
 
 function hsStep(id) {
   const el = q(id);
   el.textContent = el.textContent.replace('⬜','✅');
-  el.className = 'text-green-500';
+  el.className = 'text-green-700';
 }
 
 const receiver = new ArrowChildReceiver({ listenMode, listenDelay: delay, allowedOrigins: ['*'], sourceId });
@@ -148,24 +145,22 @@ receiver
       processingTime: result.processingTime, isZeroCopy: result.isZeroCopy,
       schema: result.schema || null, receivedAt: Date.now(), receiver: sourceId,
     });
-
     const preview = q('preview');
-    preview.className = preview.className.replace('text-zinc-600','text-purple-400');
+    preview.className = preview.className.replace('text-zinc-400','text-purple-700');
     if (result.data !== undefined) {
       preview.textContent = JSON.stringify(result.data, null, 2).slice(0, 300);
     } else if (result.table) {
       const t = result.table;
-      const lines = [`Arrow: ${result.rows} × ${result.cols}  zeroCopy=${result.isZeroCopy}`];
+      const lines = [`Arrow: ${result.rows}×${result.cols}  zeroCopy=${result.isZeroCopy}`];
       for (let r = 0; r < Math.min(result.rows, 3); r++) {
         const obj = {};
         for (let c = 0; c < t.schema.fields.length; c++)
           obj[t.schema.fields[c].name] = t.getChildAt(c).get(r);
         lines.push('  ' + JSON.stringify(obj));
       }
-      if (result.rows > 3) lines.push(`  … (${result.rows - 3} more)`);
+      if (result.rows > 3) lines.push(`  … (${result.rows-3} more)`);
       preview.textContent = lines.join('\n');
     }
-
     if (isFirst) {
       setListenActive(false);
       log('⏸ Paused after FIRST_MESSAGE', 'warn');
@@ -178,11 +173,11 @@ receiver
   });
 
 q('btn-reply').addEventListener('click', () => {
-  const msgId   = 'reply-' + Date.now();
+  const msgId = 'reply-' + Date.now();
   const payload = { __iframeFlight:'child-reply', sourceId, messageId:msgId, timestamp:Date.now(), data:{ text:`Hello from ${sourceId}`, ts:Date.now() } };
   window.parent.postMessage(payload, '*');
   log('↑ Sent reply to parent', 'ok');
-  relay('↑ Reply sent to parent', 'ok', receiver.getState(), { messageId:msgId, timestamp:payload.timestamp, source:sourceId, target:'parent' });
+  relay('↑ Reply sent', 'ok', receiver.getState(), { messageId:msgId, timestamp:payload.timestamp, source:sourceId, target:'parent' });
 });
 
 window.addEventListener('message', (e) => {
@@ -198,7 +193,7 @@ window.addEventListener('message', (e) => {
     log(`📨 Relayed from ${from}: ${JSON.stringify(e.data.payload).slice(0,80)}`, 'recv');
     relay(`📨 Relayed from ${from}`, 'recv', receiver.getState(), { relayedFrom:from, payload:e.data.payload });
     const preview = q('preview');
-    preview.className = preview.className.replace('text-zinc-600','text-purple-400');
+    preview.className = preview.className.replace('text-zinc-400','text-purple-700');
     preview.textContent = `RELAY from ${from}:\n${JSON.stringify(e.data.payload, null, 2).slice(0, 250)}`;
   }
 });
