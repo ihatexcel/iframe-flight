@@ -27,14 +27,14 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 1.5rem;
-      max-width: 1200px;
+      padding: 1.25rem 1.5rem;
+      max-width: 1460px;
       margin: 0 auto;
     }
 
     /* ── Header ── */
-    header { margin-bottom: 1.5rem; }
-    .header-row { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.25rem; }
+    header { margin-bottom: 1.25rem; }
+    .header-row { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.2rem; }
     header h1 { font-size: 1.35rem; color: #fff; letter-spacing: -0.02em; }
     .version-badge {
       font-size: 0.7rem; font-weight: 600;
@@ -44,12 +44,21 @@
     }
     header p { font-size: 0.8rem; color: var(--muted); }
 
-    /* ── Live demo grid ── */
+    /* ── Section title ── */
+    .section-title {
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── 3-column demo grid ── */
     .demo-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 2rem;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
     }
 
     /* ── Card ── */
@@ -60,29 +69,34 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
     .card-head {
-      padding: 0.55rem 1rem;
+      padding: 0.5rem 0.75rem;
       background: #1c2128;
       border-bottom: 1px solid var(--border);
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 0.7rem; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .06em;
+      display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0;
     }
+    .card-head-title { color: var(--text); }
+
+    /* Source-ID chip */
+    .id-chip {
+      font-family: 'SFMono-Regular', 'Fira Code', monospace;
+      font-size: 0.62rem; font-weight: 700;
+      padding: .1rem .45rem; border-radius: 4px;
+      letter-spacing: .02em; flex-shrink: 0;
+    }
+    .id-chip.alpha { background: #1f3a5f; color: var(--accent); border: 1px solid #388bfd33; }
+    .id-chip.beta  { background: #2d1f5f; color: var(--purple); border: 1px solid #bc8cff33; }
+    .id-chip.parent { background: #1a2d1a; color: var(--green); border: 1px solid #3fb95033; }
 
     /* ── State dot ── */
     .state-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      background: var(--muted);
-      transition: background 0.3s;
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      background: var(--muted); transition: background 0.3s;
     }
     .state-dot.CONNECTING { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); animation: pulse 1.2s infinite; }
     .state-dot.READY      { background: var(--green);  box-shadow: 0 0 5px var(--green); }
@@ -91,38 +105,58 @@
     .state-dot.ERROR      { background: var(--red);    box-shadow: 0 0 5px var(--red); }
     .state-dot.CLOSED     { background: var(--muted); }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-    .state-label { color: var(--text); font-weight: 700; }
+    .state-label { font-weight: 700; color: var(--text); }
 
     /* ── Handshake steps ── */
     .handshake {
-      padding: 0.6rem 1rem;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 0;
-      font-size: 0.7rem;
+      padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      font-size: 0.67rem; flex-shrink: 0;
     }
-    .hs-step { display: flex; align-items: center; gap: 0.3rem; color: var(--muted); transition: color .25s; }
+    .hs-step { display: flex; align-items: center; gap: 0.25rem; color: var(--muted); transition: color .25s; }
     .hs-step.done { color: var(--green); }
-    .hs-icon { font-size: 0.85rem; }
-    .hs-arrow { margin: 0 0.35rem; color: var(--border); transition: color .25s; }
+    .hs-icon { font-size: 0.8rem; }
+    .hs-arrow { margin: 0 0.3rem; color: var(--border); transition: color .25s; }
     .hs-arrow.done { color: var(--green); }
 
     /* ── Stats ── */
     .stats {
       display: grid; grid-template-columns: repeat(3,1fr);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
-    .stat { padding: 0.5rem 0; text-align: center; border-right: 1px solid var(--border); }
+    .stat { padding: 0.45rem 0; text-align: center; border-right: 1px solid var(--border); }
     .stat:last-child { border-right: none; }
-    .stat-val { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
-    .stat-key { font-size: 0.62rem; color: var(--muted); margin-top: 0.1rem; }
+    .stat-val { font-size: 1.15rem; font-weight: 700; color: var(--accent); }
+    .stat-key { font-size: 0.6rem; color: var(--muted); margin-top: 0.05rem; }
+
+    /* ── Target selector ── */
+    .target-selector {
+      padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;
+      font-size: 0.7rem;
+    }
+    .target-selector label.lbl { color: var(--muted); font-weight: 600; flex-shrink: 0; }
+    .target-radio { display: flex; gap: 0.3rem; }
+    .target-radio input { display: none; }
+    .target-radio label {
+      padding: .18rem .5rem; border-radius: 5px; cursor: pointer;
+      border: 1px solid var(--border); font-size: 0.68rem; font-weight: 600;
+      color: var(--muted); transition: all .15s;
+    }
+    .target-radio input:checked + label { border-color: var(--accent); color: var(--accent); background: #1f6feb1a; }
+    .relay-btn {
+      margin-left: auto; padding: .18rem .5rem; border-radius: 5px;
+      background: #2a1a3d; color: var(--purple); border: 1px solid #bc8cff33;
+      font-size: 0.68rem; font-weight: 600; cursor: pointer; transition: opacity .15s;
+    }
+    .relay-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     /* ── Controls ── */
-    .controls { padding: 0.6rem 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; border-bottom: 1px solid var(--border); }
+    .controls { padding: 0.5rem 0.65rem; display: flex; flex-direction: column; gap: 0.35rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
     button {
-      padding: 0.45rem 0.9rem;
-      border-radius: 6px; border: 1px solid transparent;
-      cursor: pointer; font-size: 0.78rem; font-weight: 600;
+      padding: 0.38rem 0.75rem; border-radius: 6px; border: 1px solid transparent;
+      cursor: pointer; font-size: 0.75rem; font-weight: 600;
       transition: opacity .15s, transform .1s; text-align: left;
     }
     button:active:not(:disabled) { transform: scale(0.98); }
@@ -132,100 +166,140 @@
     .btn-grey  { background: #21262d; color: var(--text); border-color: var(--border); }
     .btn-red   { background: #3d1a1a; color: var(--red); border-color: #f8514944; }
     .btn-label { font-weight: 700; }
-    .btn-hint  { font-weight: 400; color: rgba(255,255,255,.45); font-size: 0.7rem; margin-left: 0.35rem; }
+    .btn-hint  { font-weight: 400; color: rgba(255,255,255,.4); font-size: 0.68rem; margin-left: 0.3rem; }
 
     /* ── SAB notice ── */
-    .sab-notice { padding: 0.35rem 1rem; font-size: 0.7rem; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .sab-notice { padding: 0.3rem 0.75rem; font-size: 0.68rem; color: var(--muted); border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .sab-notice.ok   { color: var(--green); }
     .sab-notice.warn { color: var(--yellow); }
 
     /* ── Log ── */
     .log {
       font-family: 'SFMono-Regular', 'Fira Code', monospace;
-      font-size: 0.7rem; padding: 0.6rem;
-      flex: 1; min-height: 160px; max-height: 200px;
-      overflow-y: auto; display: flex; flex-direction: column; gap: 0.18rem;
+      font-size: 0.67rem; padding: 0.5rem 0.65rem;
+      flex: 1; min-height: 120px; max-height: 165px;
+      overflow-y: auto; display: flex; flex-direction: column; gap: 0.15rem;
       scrollbar-width: thin; scrollbar-color: var(--border) transparent;
     }
-    .log-row { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.3rem; line-height: 1.45; }
+    .log-row { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.25rem; line-height: 1.45; }
     .log-ts  { color: var(--muted); }
     .log-msg { color: var(--text); word-break: break-word; }
     .log-row.ok   .log-msg { color: var(--green); }
     .log-row.err  .log-msg { color: var(--red); }
     .log-row.info .log-msg { color: var(--accent); }
     .log-row.recv .log-msg { color: var(--purple); }
+    .log-row.warn .log-msg { color: var(--orange); }
+
+    /* ── Mode selector (child cards) ── */
+    .mode-selector {
+      padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0; font-size: 0.7rem;
+    }
+    .mode-selector label.lbl { color: var(--muted); font-weight: 600; flex-shrink: 0; }
+    .mode-radio { display: flex; gap: 0.3rem; }
+    .mode-radio input { display: none; }
+    .mode-radio label {
+      padding: .15rem .45rem; border-radius: 5px; cursor: pointer;
+      border: 1px solid var(--border); font-size: 0.66rem; font-weight: 600;
+      color: var(--muted); transition: all .15s;
+    }
+    .mode-radio input:checked + label { border-color: var(--green); color: var(--green); background: #3fb9501a; }
+    .resume-btn {
+      margin-left: auto; padding: .15rem .45rem; border-radius: 5px;
+      background: #2d3b1a; color: #7ee83f; border: 1px solid #3fb95044;
+      font-size: 0.67rem; font-weight: 600; cursor: pointer;
+    }
+    .resume-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     /* ── Iframe shell ── */
-    .iframe-shell { border-top: 1px solid var(--border); position: relative; }
-    .iframe-label {
-      position: absolute; top: 0.35rem; left: 0.75rem;
-      font-size: 0.62rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .07em; color: var(--muted); pointer-events: none; z-index: 1;
+    .iframe-shell { border-top: 1px solid var(--border); flex-shrink: 0; }
+    iframe { display: block; width: 100%; height: 270px; border: none; background: var(--bg); }
+
+    /* ══════════════════════════════════════════════
+       MESSAGE INSPECTOR
+    ══════════════════════════════════════════════ */
+    .inspector {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem;
     }
-    iframe { display: block; width: 100%; height: 320px; border: none; background: var(--bg); }
+    .inspector-head {
+      padding: 0.45rem 0.85rem; background: #1c2128; border-bottom: 1px solid var(--border);
+      font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .06em; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .inspector-live { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background .3s; }
+    .inspector-live.active { background: var(--green); box-shadow: 0 0 4px var(--green); }
+    .inspector-body { padding: 0.6rem 0.85rem; }
+    .inspector-empty { font-size: 0.72rem; color: var(--muted); font-style: italic; }
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+    }
+    .insp-field { display: flex; flex-direction: column; gap: 0.15rem; }
+    .insp-key {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted);
+    }
+    .insp-val {
+      font-family: 'SFMono-Regular', 'Fira Code', monospace;
+      font-size: 0.7rem; color: var(--accent);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .insp-val.green  { color: var(--green); }
+    .insp-val.purple { color: var(--purple); }
+    .insp-val.orange { color: var(--orange); }
+    .insp-val.red    { color: var(--red); }
+    .insp-val.muted  { color: var(--muted); }
+    .insp-direction {
+      grid-column: span 6; font-size: 0.68rem; color: var(--muted);
+      padding-bottom: 0.4rem; margin-bottom: 0.1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .insp-from { font-family: monospace; font-weight: 700; }
+    .insp-from.alpha  { color: var(--accent); }
+    .insp-from.beta   { color: var(--purple); }
+    .insp-from.parent { color: var(--green); }
 
     /* ════════════════════════════════════════════
        API REFERENCE SECTION
     ════════════════════════════════════════════ */
     .api-section { margin-bottom: 2rem; }
 
-    .section-title {
-      font-size: 0.7rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .08em;
-      color: var(--muted); margin-bottom: 0.75rem;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .section-title::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
-
     /* ── Tabs ── */
     .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
     .tab {
       padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 600;
       color: var(--muted); cursor: pointer; border: none; background: none;
-      border-bottom: 2px solid transparent; margin-bottom: -1px;
-      transition: color .15s;
+      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s;
     }
     .tab:hover { color: var(--text); }
     .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
     /* ── Code block ── */
     .code-block {
-      background: #010409;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 1rem;
+      background: #010409; border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem;
     }
-
     .code-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.4rem 0.75rem;
-      background: #1c2128; border-bottom: 1px solid var(--border);
+      padding: 0.4rem 0.75rem; background: #1c2128; border-bottom: 1px solid var(--border);
       font-size: 0.7rem;
     }
-    .code-label {
-      color: var(--muted); font-weight: 600;
-      display: flex; align-items: center; gap: 0.4rem;
-    }
-    .code-label .badge {
-      padding: .1rem .4rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700;
-    }
+    .code-label { color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .code-label .badge { padding: .1rem .4rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
     .badge-star    { background: #2d3b1a; color: #7ee83f; }
     .badge-parent  { background: #1f3a5f; color: #93c5fd; }
     .badge-child   { background: #3b1f5f; color: var(--purple); }
 
     .copy-btn {
       display: flex; align-items: center; gap: 0.3rem;
-      padding: .25rem .55rem; border-radius: 5px;
-      font-size: 0.68rem; font-weight: 600;
-      background: #21262d; color: var(--muted);
-      border: 1px solid var(--border); cursor: pointer;
-      transition: color .15s, border-color .15s;
+      padding: .25rem .55rem; border-radius: 5px; font-size: 0.68rem; font-weight: 600;
+      background: #21262d; color: var(--muted); border: 1px solid var(--border);
+      cursor: pointer; transition: color .15s, border-color .15s;
     }
     .copy-btn:hover { color: var(--text); border-color: var(--muted); }
     .copy-btn.copied { color: var(--green); border-color: var(--green); }
@@ -238,84 +312,35 @@
     }
 
     /* Syntax colours */
-    .kw   { color: #ff7b72; }   /* keywords: const, import, new, return */
-    .fn   { color: #d2a8ff; }   /* function names */
-    .str  { color: #a5d6ff; }   /* strings */
-    .cm   { color: #8b949e; font-style: italic; } /* comments */
-    .num  { color: #79c0ff; }   /* numbers */
-    .obj  { color: #ffa657; }   /* objects / types */
-    .op   { color: #c9d1d9; }   /* operators */
+    .kw   { color: #ff7b72; }
+    .fn   { color: #d2a8ff; }
+    .str  { color: #a5d6ff; }
+    .cm   { color: #8b949e; font-style: italic; }
+    .num  { color: #79c0ff; }
+    .obj  { color: #ffa657; }
+    .op   { color: #c9d1d9; }
 
     /* ── Methods reference ── */
-    .method-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .method-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
+    .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .method-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .method-card-head {
-      padding: 0.5rem 0.75rem;
-      background: #1c2128; border-bottom: 1px solid var(--border);
+      padding: 0.5rem 0.75rem; background: #1c2128; border-bottom: 1px solid var(--border);
       font-size: 0.72rem; font-weight: 700; color: var(--text);
       display: flex; align-items: center; gap: 0.4rem;
     }
     .method-list { list-style: none; padding: 0.25rem 0; }
     .method-item {
-      padding: 0.4rem 0.75rem;
-      border-bottom: 1px solid #1c2128;
-      display: flex; align-items: baseline; gap: 0.6rem;
-      font-size: 0.73rem;
+      padding: 0.4rem 0.75rem; border-bottom: 1px solid #1c2128;
+      display: flex; align-items: baseline; gap: 0.6rem; font-size: 0.73rem;
     }
     .method-item:last-child { border-bottom: none; }
-    .method-sig {
-      font-family: 'SFMono-Regular', 'Fira Code', monospace;
-      color: var(--accent); flex-shrink: 0;
-      font-size: 0.7rem;
-    }
+    .method-sig { font-family: 'SFMono-Regular', 'Fira Code', monospace; color: var(--accent); flex-shrink: 0; font-size: 0.7rem; }
     .method-sig .m-kw { color: #ff7b72; }
     .method-sig .m-fn { color: #d2a8ff; }
     .method-sig .m-ty { color: #ffa657; }
     .method-desc { color: var(--muted); font-size: 0.7rem; flex: 1; }
-    .star-badge {
-      font-size: 0.6rem; font-weight: 700;
-      background: #2d3b1a; color: #7ee83f;
-      border: 1px solid #3fb95044;
-      padding: .05rem .35rem; border-radius: 4px; flex-shrink: 0;
-    }
+    .star-badge { font-size: 0.6rem; font-weight: 700; background: #2d3b1a; color: #7ee83f; border: 1px solid #3fb95044; padding: .05rem .35rem; border-radius: 4px; flex-shrink: 0; }
 
-    .btn-purple { background: #2a1a3d; color: var(--purple); border-color: #bc8cff33; }
-
-    /* ── Mode selector ── */
-    .mode-selector {
-      padding: 0.5rem 0.75rem;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 0.5rem;
-      font-size: 0.72rem; flex-shrink: 0;
-    }
-    .mode-selector label { color: var(--muted); font-weight: 600; }
-    .mode-radio { display: flex; gap: 0.35rem; }
-    .mode-radio input { display: none; }
-    .mode-radio label {
-      padding: .2rem .55rem; border-radius: 5px; cursor: pointer;
-      border: 1px solid var(--border); font-size: 0.7rem; font-weight: 600;
-      color: var(--muted); transition: all .15s;
-    }
-    .mode-radio input:checked + label {
-      border-color: var(--accent); color: var(--accent); background: #1f6feb1a;
-    }
-    .resume-btn {
-      margin-left: auto;
-      padding: .2rem .55rem; border-radius: 5px; cursor: pointer;
-      background: #2d3b1a; color: #7ee83f; border: 1px solid #3fb95044;
-      font-size: 0.7rem; font-weight: 600;
-    }
-    .resume-btn:disabled { opacity: .35; cursor: not-allowed; }
     footer { margin-top: 1rem; font-size: 0.72rem; color: var(--muted); }
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
@@ -333,17 +358,18 @@
 </header>
 
 <!-- ════════════════════════════════════════════
-     LIVE DEMO
+     LIVE DEMO — 3-column grid
 ════════════════════════════════════════════ -->
 <div class="section-title">Live demo</div>
 
 <div class="demo-grid">
 
-  <!-- Parent panel -->
+  <!-- ── Parent ── -->
   <div class="card">
     <div class="card-head">
       <div class="state-dot CONNECTING" id="parent-dot"></div>
-      Parent window —
+      <span class="card-head-title">Parent window</span>
+      <span class="id-chip parent">window</span>
       <span class="state-label" id="parent-state">CONNECTING</span>
     </div>
 
@@ -352,7 +378,7 @@
       <span class="hs-arrow" id="hs-arrow-1">→</span>
       <span class="hs-step" id="hs-parent-ack"><span class="hs-icon">⬜</span> PARENT_ACK</span>
       <span class="hs-arrow" id="hs-arrow-2">→</span>
-      <span class="hs-step" id="hs-connected"><span class="hs-icon">⬜</span> Connected</span>
+      <span class="hs-step" id="hs-connected"><span class="hs-icon">⬜</span> Ready</span>
     </div>
 
     <div class="stats">
@@ -361,10 +387,24 @@
       <div class="stat"><div class="stat-val" id="stat-rtt">—</div><div class="stat-key">RTT ms</div></div>
     </div>
 
+    <!-- Target selector -->
+    <div class="target-selector">
+      <label class="lbl">Target:</label>
+      <div class="target-radio">
+        <input type="radio" name="target" id="tgt-alpha" value="alpha" checked>
+        <label for="tgt-alpha">child-alpha</label>
+        <input type="radio" name="target" id="tgt-beta" value="beta">
+        <label for="tgt-beta">child-beta</label>
+        <input type="radio" name="target" id="tgt-both" value="both">
+        <label for="tgt-both">Both</label>
+      </div>
+      <button class="relay-btn" id="btn-relay" disabled title="Forward last child reply to the other child (parent relay pattern)">📨 Relay</button>
+    </div>
+
     <div class="controls">
       <button class="btn-star" id="btn-auto" disabled>
-        <span class="btn-label">send() — auto</span>
-        <span class="btn-hint">picks best format automatically ⭐</span>
+        <span class="btn-label">send()</span>
+        <span class="btn-hint">auto — picks best format ⭐</span>
       </button>
       <button class="btn-blue" id="btn-json" disabled>
         <span class="btn-label">sendJSON()</span>
@@ -388,36 +428,136 @@
     <div class="log" id="parent-log"></div>
   </div>
 
-  <!-- Child panel -->
+  <!-- ── Child alpha ── -->
   <div class="card">
     <div class="card-head">
-      <div class="state-dot CONNECTING" id="child-dot"></div>
-      Child iframe —
-      <span class="state-label" id="child-state">CONNECTING</span>
+      <div class="state-dot CONNECTING" id="alpha-dot"></div>
+      <span class="card-head-title">Child iframe</span>
+      <span class="id-chip alpha">child-alpha</span>
+      <span class="state-label" id="alpha-state">CONNECTING</span>
     </div>
 
-    <!-- Listen mode selector -->
     <div class="mode-selector">
-      <label>Listen mode:</label>
+      <label class="lbl">Mode:</label>
       <div class="mode-radio">
-        <input type="radio" name="listen-mode" id="mode-cont" value="continuous" checked>
-        <label for="mode-cont">CONTINUOUS</label>
-        <input type="radio" name="listen-mode" id="mode-first" value="first">
-        <label for="mode-first">FIRST_MESSAGE</label>
+        <input type="radio" name="mode-alpha" id="mode-alpha-cont" value="continuous" checked>
+        <label for="mode-alpha-cont">CONTINUOUS</label>
+        <input type="radio" name="mode-alpha" id="mode-alpha-first" value="first">
+        <label for="mode-alpha-first">FIRST_MESSAGE</label>
       </div>
-      <button class="resume-btn" id="btn-resume" disabled title="Call resumeListening() in child">▶ resumeListening()</button>
+      <button class="resume-btn" id="btn-resume-alpha" disabled>▶ resume</button>
     </div>
 
-    <div class="log" id="child-log"></div>
+    <div class="log" id="log-alpha"></div>
 
     <div class="iframe-shell">
-      <span class="iframe-label">live iframe ↓</span>
-      <iframe id="child-frame" src="./child.html"
+      <iframe id="frame-alpha"
+        src="./child.html?sourceId=child-alpha"
         sandbox="allow-scripts"
-        title="iframe-flight child receiver demo"></iframe>
+        title="child-alpha receiver"></iframe>
     </div>
   </div>
 
+  <!-- ── Child beta ── -->
+  <div class="card">
+    <div class="card-head">
+      <div class="state-dot CONNECTING" id="beta-dot"></div>
+      <span class="card-head-title">Child iframe</span>
+      <span class="id-chip beta">child-beta</span>
+      <span class="state-label" id="beta-state">CONNECTING</span>
+    </div>
+
+    <div class="mode-selector">
+      <label class="lbl">Mode:</label>
+      <div class="mode-radio">
+        <input type="radio" name="mode-beta" id="mode-beta-cont" value="continuous" checked>
+        <label for="mode-beta-cont">CONTINUOUS</label>
+        <input type="radio" name="mode-beta" id="mode-beta-first" value="first">
+        <label for="mode-beta-first">FIRST_MESSAGE</label>
+      </div>
+      <button class="resume-btn" id="btn-resume-beta" disabled>▶ resume</button>
+    </div>
+
+    <div class="log" id="log-beta"></div>
+
+    <div class="iframe-shell">
+      <iframe id="frame-beta"
+        src="./child.html?sourceId=child-beta"
+        sandbox="allow-scripts"
+        title="child-beta receiver"></iframe>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     MESSAGE INSPECTOR
+════════════════════════════════════════════ -->
+<div class="inspector" id="inspector">
+  <div class="inspector-head">
+    <div class="inspector-live" id="inspector-live"></div>
+    Message inspector — last event metadata
+    <span id="inspector-dir" style="margin-left:auto;font-size:0.65rem;font-weight:400;color:var(--muted)">awaiting first message…</span>
+  </div>
+  <div class="inspector-body">
+    <div class="inspector-empty" id="inspector-empty">No messages yet. Send data or click Reply in a child iframe.</div>
+    <div class="inspector-grid" id="inspector-grid" style="display:none">
+      <div class="insp-direction" id="insp-dir-row">
+        <span>Direction:</span>
+        <span class="insp-from" id="insp-source">—</span>
+        <span>→</span>
+        <span class="insp-from" id="insp-target">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Message ID</span>
+        <span class="insp-val" id="insp-msgid" title="">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Timestamp</span>
+        <span class="insp-val" id="insp-ts">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Format</span>
+        <span class="insp-val" id="insp-format">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Rows</span>
+        <span class="insp-val green" id="insp-rows">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Cols</span>
+        <span class="insp-val green" id="insp-cols">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Size (bytes)</span>
+        <span class="insp-val" id="insp-size">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Processing</span>
+        <span class="insp-val orange" id="insp-proc">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Zero-copy</span>
+        <span class="insp-val" id="insp-zc">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Correlation ID</span>
+        <span class="insp-val muted" id="insp-corr">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Schema</span>
+        <span class="insp-val muted" id="insp-schema" title="">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Received at</span>
+        <span class="insp-val muted" id="insp-recvat">—</span>
+      </div>
+      <div class="insp-field">
+        <span class="insp-key">Receiver</span>
+        <span class="insp-val" id="insp-receiver">—</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════
@@ -596,8 +736,8 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
 <span class="cm">// If messages arrive faster than processing, only the LATEST is kept</span>
 <span class="cm">// (buffer of 2). Use listenDelay to debounce rapid sends.</span>
 <span class="kw">const</span> receiver = <span class="kw">new</span> <span class="obj">ArrowChildReceiver</span>({
-  listenMode:  <span class="obj">ListenMode</span>.CONTINUOUS,
-  listenDelay: <span class="num">100</span>,   <span class="cm">// debounce: wait 100ms before processing, keep only latest</span>
+  listenMode:     <span class="obj">ListenMode</span>.CONTINUOUS,
+  listenDelay:    <span class="num">100</span>,   <span class="cm">// debounce: wait 100ms before processing, keep only latest</span>
   allowedOrigins: [<span class="str">'https://parent-app.com'</span>],
 });
 
@@ -636,7 +776,7 @@ receiver
 <span class="cm">// Ideal for one-shot data loads (init data, config, etc.).</span>
 <span class="cm">// Call resumeListening() when ready to accept the next one.</span>
 <span class="kw">const</span> receiver = <span class="kw">new</span> <span class="obj">ArrowChildReceiver</span>({
-  listenMode: <span class="obj">ListenMode</span>.FIRST_MESSAGE,
+  listenMode:     <span class="obj">ListenMode</span>.FIRST_MESSAGE,
   allowedOrigins: [<span class="str">'https://parent-app.com'</span>],
 });
 
@@ -795,6 +935,7 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
     <a href="https://github.com/ihatexcel/iframe-flight" target="_blank">github.com/ihatexcel/iframe-flight</a>
     — Zero-copy requires <code>Cross-Origin-Opener-Policy: same-origin</code> +
     <code>Cross-Origin-Embedder-Policy: require-corp</code> (not set by GitHub Pages).
+    Child↔child communication requires parent relay — <code>ArrowChildReceiver</code> targets <code>window.parent</code> only.
   </p>
 </footer>
 
@@ -809,9 +950,15 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
   /* ── Counters ── */
   var sent = 0, acked = 0;
 
+  /* ── Per-child state ── */
+  var alphaReady = false, betaReady = false;
+  var lastReply = null; // last child-reply for relay
+
   /* ── DOM helpers ── */
   function q(id) { return document.getElementById(id); }
-
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
   function log(panelId, msg, type) {
     var panel = q(panelId);
     var now   = new Date().toISOString().slice(11, 23);
@@ -824,27 +971,13 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
     panel.scrollTop = panel.scrollHeight;
   }
 
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  /* ── State dots ── */
+  function setDot(dotId, stateId, s) {
+    q(dotId).className   = 'state-dot ' + s;
+    q(stateId).textContent = s;
   }
 
-  function setParentState(s) {
-    q('parent-dot').className = 'state-dot ' + s;
-    q('parent-state').textContent = s;
-  }
-
-  function setChildState(s) {
-    q('child-dot').className = 'state-dot ' + s;
-    q('child-state').textContent = s;
-  }
-
-  function hsStep(id, arrowId) {
-    var el = q(id);
-    el.className = 'hs-step done';
-    el.querySelector('.hs-icon').textContent = '✅';
-    if (arrowId) q(arrowId).className = 'hs-arrow done';
-  }
-
+  /* ── Arrow buffer factory ── */
   function makeArrowBuf() {
     var table = tableFromArrays({
       id:    [1, 2, 3, 4, 5],
@@ -854,149 +987,340 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
     return { buf: tableToIPC(table), schema: table.schema.toString() };
   }
 
-  /* ── Emitter ── */
-  var iframe  = q('child-frame');
-  var emitter = new ArrowParentEmitter(iframe, {
-    handshakeTimeout: 8000,
-    ackTimeout: 5000,
-    allowedOrigins: ['*'],
+  /* ── Inspector ── */
+  function updateInspector(meta, fromId, toId) {
+    q('inspector-empty').style.display = 'none';
+    q('inspector-grid').style.display  = 'grid';
+
+    var live = q('inspector-live');
+    live.className = 'inspector-live active';
+    setTimeout(function() { live.className = 'inspector-live'; }, 1200);
+
+    // Direction row
+    var srcEl = q('insp-source');
+    srcEl.textContent = fromId || '—';
+    srcEl.className   = 'insp-from ' + (fromId === 'child-alpha' ? 'alpha' : fromId === 'child-beta' ? 'beta' : 'parent');
+    var tgtEl = q('insp-target');
+    tgtEl.textContent = toId || '—';
+    tgtEl.className   = 'insp-from ' + (toId === 'child-alpha' ? 'alpha' : toId === 'child-beta' ? 'beta' : 'parent');
+
+    q('inspector-dir').textContent = (fromId || '?') + ' → ' + (toId || '?');
+
+    function setField(id, val, cls) {
+      var el = q(id);
+      el.textContent = val !== undefined && val !== null ? String(val) : '—';
+      if (cls) el.className = 'insp-val ' + cls;
+    }
+
+    var msgId = meta.messageId || '—';
+    q('insp-msgid').textContent = msgId;
+    q('insp-msgid').title       = msgId;
+
+    var ts = meta.timestamp ? new Date(meta.timestamp).toISOString().slice(11, 23) : '—';
+    setField('insp-ts',      ts);
+    setField('insp-format',  meta.format);
+    setField('insp-rows',    meta.rows !== undefined ? meta.rows : '—', 'green');
+    setField('insp-cols',    meta.cols !== undefined ? meta.cols : '—', 'green');
+    setField('insp-size',    meta.size ? meta.size + ' B' : '—');
+    setField('insp-proc',    meta.processingTime !== undefined ? meta.processingTime + ' ms' : '—', 'orange');
+
+    var zcEl = q('insp-zc');
+    if (meta.isZeroCopy === true)       { zcEl.textContent = '⚡ yes'; zcEl.className = 'insp-val green'; }
+    else if (meta.isZeroCopy === false) { zcEl.textContent = 'no';     zcEl.className = 'insp-val muted'; }
+    else                                { zcEl.textContent = '—';      zcEl.className = 'insp-val muted'; }
+
+    setField('insp-corr',     meta.correlationId || '—');
+    var schema = meta.schema || '—';
+    q('insp-schema').textContent = schema.length > 40 ? schema.slice(0, 38) + '…' : schema;
+    q('insp-schema').title       = schema;
+
+    var recvAt = meta.receivedAt ? new Date(meta.receivedAt).toISOString().slice(11, 23) : '—';
+    setField('insp-recvat',  recvAt, 'muted');
+    setField('insp-receiver', meta.receiver || toId || '—');
+  }
+
+  /* ════════════════════════════════
+     EMITTER — ALPHA
+  ════════════════════════════════ */
+  var emitterAlpha = new ArrowParentEmitter(q('frame-alpha'), {
+    handshakeTimeout: 8000, ackTimeout: 5000, allowedOrigins: ['*'],
   });
 
-  var sabOk  = emitter.isSABSupported();
+  emitterAlpha
+    .onStateChange(function (next, prev) {
+      setDot('alpha-dot', 'alpha-state', next);
+      log('log-alpha', 'State: ' + prev + ' → ' + next, 'info');
+      if (next === State.READY && prev === State.CONNECTING) {
+        alphaReady = true;
+        log('log-alpha', '✅ Handshake complete', 'ok');
+        // Show first handshake completion in parent panel
+        if (!betaReady) {
+          q('hs-child-ready').className = 'hs-step done';
+          q('hs-child-ready').querySelector('.hs-icon').textContent = '✅';
+          q('hs-arrow-1').className = 'hs-arrow done';
+          q('hs-parent-ack').className = 'hs-step done';
+          q('hs-parent-ack').querySelector('.hs-icon').textContent = '✅';
+          q('hs-arrow-2').className = 'hs-arrow done';
+        }
+        refreshParentState();
+      }
+    })
+    .onError(function (err) {
+      log('log-alpha', '❌ ' + err.message, 'err');
+    });
+
+  /* ════════════════════════════════
+     EMITTER — BETA
+  ════════════════════════════════ */
+  var emitterBeta = new ArrowParentEmitter(q('frame-beta'), {
+    handshakeTimeout: 8000, ackTimeout: 5000, allowedOrigins: ['*'],
+  });
+
+  emitterBeta
+    .onStateChange(function (next, prev) {
+      setDot('beta-dot', 'beta-state', next);
+      log('log-beta', 'State: ' + prev + ' → ' + next, 'info');
+      if (next === State.READY && prev === State.CONNECTING) {
+        betaReady = true;
+        log('log-beta', '✅ Handshake complete', 'ok');
+        if (alphaReady) {
+          // Both ready
+          q('hs-connected').className = 'hs-step done';
+          q('hs-connected').querySelector('.hs-icon').textContent = '✅';
+          log('parent-log', '✅ Both children ready', 'ok');
+        }
+        refreshParentState();
+      }
+    })
+    .onError(function (err) {
+      log('log-beta', '❌ ' + err.message, 'err');
+    });
+
+  /* ── SAB notice (shared) ── */
+  var sabOk  = emitterAlpha.isSABSupported();
   var notice = q('sab-notice');
   if (sabOk) {
     notice.textContent = '⚡ SharedArrayBuffer available — zero-copy enabled';
-    notice.className = 'sab-notice ok';
+    notice.className   = 'sab-notice ok';
   } else {
-    notice.textContent = '⚠ SharedArrayBuffer unavailable (COOP/COEP headers missing on GitHub Pages) — copy mode only';
-    notice.className = 'sab-notice warn';
+    notice.textContent = '⚠ SharedArrayBuffer unavailable (COOP/COEP missing on GitHub Pages) — copy mode only';
+    notice.className   = 'sab-notice warn';
   }
 
-  log('parent-log', 'Waiting for child iframe to load…', 'info');
+  setDot('parent-dot', 'parent-state', 'CONNECTING');
+  log('parent-log', 'Waiting for child iframes to load…', 'info');
 
-  emitter
-    .onStateChange(function (next, prev) {
-      setParentState(next);
-      log('parent-log', 'State: ' + prev + ' → ' + next, 'info');
-      if (next === State.READY && prev === State.CONNECTING) {
-        hsStep('hs-child-ready', 'hs-arrow-1');
-        hsStep('hs-parent-ack',  'hs-arrow-2');
-        hsStep('hs-connected',   null);
-        ['btn-auto','btn-json','btn-copy'].forEach(function(id){ q(id).disabled = false; });
-        if (sabOk) q('btn-zerocopy').disabled = false;
-      }
-    })
-    .onReady(function () {
-      log('parent-log', '✅ Handshake complete — ready to send data', 'ok');
-    })
-    .onError(function (err) {
-      log('parent-log', '❌ ' + err.message, 'err');
-    });
+  /* ── Enable buttons when target(s) are ready ── */
+  function refreshParentState() {
+    var sel     = document.querySelector('input[name="target"]:checked').value;
+    var canSend = (sel === 'alpha' && alphaReady) ||
+                  (sel === 'beta'  && betaReady)  ||
+                  (sel === 'both'  && alphaReady && betaReady);
+    ['btn-auto','btn-json','btn-copy'].forEach(function(id){ q(id).disabled = !canSend; });
+    if (sabOk) q('btn-zerocopy').disabled = !canSend;
+
+    // Update parent dot
+    if (alphaReady || betaReady) {
+      setDot('parent-dot', 'parent-state', 'READY');
+    }
+  }
+
+  document.querySelectorAll('input[name="target"]').forEach(function(r){
+    r.addEventListener('change', refreshParentState);
+  });
+
+  /* ── Get active emitters ── */
+  function getTargets() {
+    var sel = document.querySelector('input[name="target"]:checked').value;
+    if (sel === 'alpha') return [{ e: emitterAlpha, name: 'child-alpha', logId: 'log-alpha' }];
+    if (sel === 'beta')  return [{ e: emitterBeta,  name: 'child-beta',  logId: 'log-beta'  }];
+    return [
+      { e: emitterAlpha, name: 'child-alpha', logId: 'log-alpha' },
+      { e: emitterBeta,  name: 'child-beta',  logId: 'log-beta'  },
+    ];
+  }
 
   /* ── Send helper ── */
-  function doSend(label, fn) {
-    sent++;
-    q('stat-sent').textContent = sent;
-    log('parent-log', '→ Sending ' + label + '…');
-    var t0 = performance.now();
-    fn().then(function (ack) {
-      var rtt = Math.round(performance.now() - t0);
-      acked++;
-      q('stat-acked').textContent = acked;
-      q('stat-rtt').textContent   = rtt;
-      log('parent-log',
-        '✅ ACK  rows=' + ack.rows + '  cols=' + ack.cols +
-        '  proc=' + ack.processingTime + 'ms  zeroCopy=' + ack.isZeroCopy, 'ok');
-    }).catch(function (err) {
-      log('parent-log', '❌ ' + err.message, 'err');
+  function doSend(label, makeFn) {
+    var targets = getTargets();
+    targets.forEach(function (t) {
+      sent++;
+      q('stat-sent').textContent = sent;
+      log('parent-log', '→ [' + t.name + '] ' + label + '…');
+      var t0 = performance.now();
+      makeFn(t.e).then(function (ack) {
+        var rtt = Math.round(performance.now() - t0);
+        acked++;
+        q('stat-acked').textContent = acked;
+        q('stat-rtt').textContent   = rtt;
+        var summary = '✅ [' + t.name + '] rows=' + ack.rows + ' cols=' + ack.cols +
+          ' proc=' + ack.processingTime + 'ms zc=' + ack.isZeroCopy;
+        log('parent-log', summary, 'ok');
+      }).catch(function (err) {
+        log('parent-log', '❌ [' + t.name + '] ' + err.message, 'err');
+      });
     });
   }
 
   q('btn-auto').addEventListener('click', function () {
-    doSend('send() auto — Arrow IPC', function () {
+    doSend('send() auto', function (e) {
       var a = makeArrowBuf();
-      // send() will pick zero-copy if SAB available, copy otherwise
-      return emitter.send(a.buf, { format: 'auto', schema: a.schema });
+      return e.send(a.buf, { format: 'auto', schema: a.schema, correlationId: 'auto-' + Date.now() });
     });
   });
-
   q('btn-json').addEventListener('click', function () {
-    doSend('sendJSON()', function () {
-      return emitter.sendJSON(
+    doSend('sendJSON()', function (e) {
+      return e.sendJSON(
         [{ id:1, name:'Alice', score:95.5 }, { id:2, name:'Bob', score:87.3 }, { id:3, name:'Charlie', score:92.1 }],
-        { correlationId: 'demo-json-' + Date.now() }
+        { correlationId: 'json-' + Date.now() }
       );
     });
   });
-
   q('btn-copy').addEventListener('click', function () {
-    doSend('sendArrowCopy()', function () {
+    doSend('sendArrowCopy()', function (e) {
       var a = makeArrowBuf();
-      return emitter.sendArrowCopy(a.buf, { schema: a.schema });
+      return e.sendArrowCopy(a.buf, { schema: a.schema, correlationId: 'copy-' + Date.now() });
     });
   });
-
   q('btn-zerocopy').addEventListener('click', function () {
-    doSend('sendArrowZeroCopy()', function () {
+    doSend('sendArrowZeroCopy()', function (e) {
       var a = makeArrowBuf();
-      return emitter.sendArrowZeroCopy(a.buf);
+      return e.sendArrowZeroCopy(a.buf);
     });
   });
-
   q('btn-close').addEventListener('click', function () {
-    emitter.close();
+    emitterAlpha.close(); emitterBeta.close();
+    alphaReady = false; betaReady = false;
     ['btn-auto','btn-json','btn-copy','btn-zerocopy'].forEach(function(id){ q(id).disabled = true; });
-    log('parent-log', 'Connection closed', 'err');
+    log('parent-log', 'Connections closed', 'err');
+    setDot('parent-dot', 'parent-state', 'CLOSED');
   });
 
-  /* ── Relay child logs ── */
+  /* ════════════════════════════════
+     RELAY — child → other child
+     ArrowChildReceiver only speaks to window.parent.
+     Child-to-child requires parent to forward the message.
+  ════════════════════════════════ */
+  q('btn-relay').addEventListener('click', function () {
+    if (!lastReply) return;
+    var from = lastReply.sourceId;
+    var toName  = from === 'child-alpha' ? 'child-beta' : 'child-alpha';
+    var toFrame = toName === 'child-alpha' ? q('frame-alpha') : q('frame-beta');
+    toFrame.contentWindow.postMessage({
+      __iframeFlight: 'relay',
+      from: from,
+      payload: lastReply.data,
+    }, '*');
+    log('parent-log', '📨 Relay ' + from + ' → ' + toName + ' (parent-relay pattern)', 'info');
+    log(toName === 'child-alpha' ? 'log-alpha' : 'log-beta',
+      '📨 Incoming relay from ' + from, 'recv');
+    q('btn-relay').disabled = true;
+    lastReply = null;
+  });
+
+  /* ════════════════════════════════
+     MESSAGES FROM CHILDREN
+  ════════════════════════════════ */
   window.addEventListener('message', function (e) {
-    if (!e.data || e.data.__iframeFlight !== 'log') return;
-    log('child-log', e.data.msg, e.data.type);
-    if (e.data.state) setChildState(e.data.state);
-    // Enable resume button when child is paused (FIRST_MESSAGE mode)
-    if (e.data.msg && e.data.msg.indexOf('Paused') !== -1) {
-      q('btn-resume').disabled = false;
+    if (!e.data) return;
+
+    /* ── Child log relay ── */
+    if (e.data.__iframeFlight === 'log') {
+      var sid  = e.data.sourceId || '';
+      var logId = sid === 'child-alpha' ? 'log-alpha' : sid === 'child-beta' ? 'log-beta' : 'parent-log';
+      log(logId, e.data.msg, e.data.type);
+
+      if (e.data.state) {
+        if (sid === 'child-alpha') setDot('alpha-dot', 'alpha-state', e.data.state);
+        if (sid === 'child-beta')  setDot('beta-dot',  'beta-state',  e.data.state);
+      }
+
+      if (e.data.meta) {
+        updateInspector(e.data.meta, sid, 'parent');
+      }
+
+      if (e.data.msg && e.data.msg.indexOf('Paused') !== -1) {
+        if (sid === 'child-alpha') q('btn-resume-alpha').disabled = false;
+        if (sid === 'child-beta')  q('btn-resume-beta').disabled  = false;
+      }
+      return;
+    }
+
+    /* ── Child → parent reply (raw postMessage, not via lib) ── */
+    if (e.data.__iframeFlight === 'child-reply') {
+      var reply = e.data;
+      lastReply = reply;
+      var src = reply.sourceId || '?';
+      log('parent-log', '↑ Reply from ' + src + ': ' + JSON.stringify(reply.data || {}).slice(0, 60), 'recv');
+      updateInspector({
+        messageId:  reply.messageId,
+        timestamp:  reply.timestamp,
+        format:     'postMessage (raw)',
+        receiver:   'parent',
+      }, src, 'parent');
+      q('btn-relay').disabled = false;
+      q('btn-relay').title    = 'Relay ' + src + ' → ' + (src === 'child-alpha' ? 'child-beta' : 'child-alpha');
+      return;
     }
   });
 
-  /* ── Mode selector — reload iframe with ?mode param ── */
-  function reloadChild() {
-    var mode = document.querySelector('input[name="listen-mode"]:checked').value;
-    q('child-log').innerHTML = '';
-    setChildState('CONNECTING');
-    q('btn-resume').disabled = true;
+  /* ════════════════════════════════
+     MODE SELECTORS (per child)
+  ════════════════════════════════ */
+  function reloadChild(frameId, logId, dotId, stateId, sourceId, resumeBtnId, emitterRef, otherReady) {
+    var mode = document.querySelector('input[name="mode-' + (sourceId === 'child-alpha' ? 'alpha' : 'beta') + '"]:checked').value;
+    var modeParam = mode === 'first' ? '?sourceId=' + sourceId + '&mode=first' : '?sourceId=' + sourceId;
+    q(logId).innerHTML = '';
+    setDot(dotId, stateId, 'CONNECTING');
+    q(resumeBtnId).disabled = true;
+
+    if (sourceId === 'child-alpha') { alphaReady = false; }
+    else { betaReady = false; }
+
     ['btn-auto','btn-json','btn-copy','btn-zerocopy'].forEach(function(id){ q(id).disabled = true; });
-    q('child-frame').src = './child.html' + (mode === 'first' ? '?mode=first' : '');
-    log('parent-log', 'Reloading iframe in ' + (mode === 'first' ? 'FIRST_MESSAGE' : 'CONTINUOUS') + ' mode…', 'info');
-    // Re-init emitter after new iframe loads
-    emitter.close();
-    setTimeout(function () {
-      var newEmitter = new ArrowParentEmitter(q('child-frame'), { handshakeTimeout: 8000, ackTimeout: 5000, allowedOrigins: ['*'] });
-      newEmitter.onStateChange(emitter.onStateChangeCallback || function(){});
-      newEmitter.onReady(function () {
-        log('parent-log', '✅ Handshake complete (new mode)', 'ok');
-        ['btn-auto','btn-json','btn-copy'].forEach(function(id){ q(id).disabled = false; });
-        if (sabOk) q('btn-zerocopy').disabled = false;
-        // reassign global handlers
-        q('btn-auto').onclick   = null; // let event listeners remain
-      });
-      newEmitter.onError(function(err){ log('parent-log', '❌ ' + err.message, 'err'); });
-      // swap reference
-      window.__activeEmitter = newEmitter;
-    }, 100);
+    log('parent-log', 'Reloading ' + sourceId + ' (' + (mode === 'first' ? 'FIRST_MESSAGE' : 'CONTINUOUS') + ')…', 'info');
+
+    emitterRef.close();
+    q(frameId).src = './child.html' + modeParam;
+
+    var newEmitter = new ArrowParentEmitter(q(frameId), { handshakeTimeout: 8000, ackTimeout: 5000, allowedOrigins: ['*'] });
+    newEmitter.onStateChange(function (next, prev) {
+      setDot(dotId, stateId, next);
+      log(logId, 'State: ' + prev + ' → ' + next, 'info');
+      if (next === State.READY) {
+        if (sourceId === 'child-alpha') { emitterAlpha = newEmitter; alphaReady = true; }
+        else                            { emitterBeta  = newEmitter; betaReady  = true; }
+        log(logId, '✅ Handshake complete', 'ok');
+        refreshParentState();
+      }
+    });
+    newEmitter.onError(function(err){ log(logId, '❌ ' + err.message, 'err'); });
+
+    if (sourceId === 'child-alpha') emitterAlpha = newEmitter;
+    else                            emitterBeta  = newEmitter;
   }
 
-  document.querySelectorAll('input[name="listen-mode"]').forEach(function (radio) {
-    radio.addEventListener('change', reloadChild);
+  document.querySelectorAll('input[name="mode-alpha"]').forEach(function(r){
+    r.addEventListener('change', function(){
+      reloadChild('frame-alpha','log-alpha','alpha-dot','alpha-state','child-alpha','btn-resume-alpha', emitterAlpha, betaReady);
+    });
+  });
+  document.querySelectorAll('input[name="mode-beta"]').forEach(function(r){
+    r.addEventListener('change', function(){
+      reloadChild('frame-beta','log-beta','beta-dot','beta-state','child-beta','btn-resume-beta', emitterBeta, alphaReady);
+    });
   });
 
-  /* ── Resume button — sends command to iframe ── */
-  q('btn-resume').addEventListener('click', function () {
-    var frame = q('child-frame');
-    frame.contentWindow.postMessage({ __iframeFlight: 'resume' }, '*');
-    q('btn-resume').disabled = true;
-    log('parent-log', '▶ resumeListening() sent to child', 'info');
+  /* ── Resume buttons ── */
+  q('btn-resume-alpha').addEventListener('click', function () {
+    q('frame-alpha').contentWindow.postMessage({ __iframeFlight: 'resume' }, '*');
+    q('btn-resume-alpha').disabled = true;
+    log('parent-log', '▶ resumeListening() → child-alpha', 'info');
+  });
+  q('btn-resume-beta').addEventListener('click', function () {
+    q('frame-beta').contentWindow.postMessage({ __iframeFlight: 'resume' }, '*');
+    q('btn-resume-beta').disabled = true;
+    log('parent-log', '▶ resumeListening() → child-beta', 'info');
   });
 
   /* ════════════════════════════════
@@ -1016,14 +1340,14 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
   ════════════════════════════════ */
   document.querySelectorAll('.copy-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var pre    = document.getElementById(btn.dataset.target);
-      var text   = pre.textContent;
+      var pre  = document.getElementById(btn.dataset.target);
+      var text = pre.textContent;
       navigator.clipboard.writeText(text).then(function () {
         btn.classList.add('copied');
-        btn.lastChild.textContent = ' Copied!';
+        btn.querySelector('svg').nextSibling.textContent = ' Copied!';
         setTimeout(function () {
           btn.classList.remove('copied');
-          btn.lastChild.textContent = ' Copy';
+          btn.querySelector('svg').nextSibling.textContent = ' Copy';
         }, 1800);
       });
     });
