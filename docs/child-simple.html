@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iframe-flight child</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-zinc-700 h-screen flex flex-col overflow-hidden text-[12px] font-sans">
+
+  <header class="flex items-center gap-2 px-3 py-2 bg-zinc-50 border-b border-zinc-200 shrink-0">
+    <span id="dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+    <span id="state-txt" class="font-semibold text-zinc-700 text-xs">CONNECTING</span>
+  </header>
+
+  <div id="log" class="flex-1 overflow-y-auto px-3 py-2 font-mono text-[11px] flex flex-col gap-px leading-relaxed"></div>
+
+  <div id="preview"
+    class="px-3 py-2 border-t border-zinc-200 font-mono text-[11px] text-zinc-400 max-h-16 overflow-auto shrink-0 whitespace-pre-wrap break-all bg-zinc-50">
+    Waiting for data…
+  </div>
+
+<script type="importmap">{"imports": {"iframe-flight": "https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"}}</script>
+<script type="module">
+import { ArrowChildReceiver, State } from 'iframe-flight';
+
+const q = id => document.getElementById(id);
+
+function log(msg, type) {
+  const colors = { ok:'text-green-700', err:'text-red-600', info:'text-blue-600', recv:'text-purple-700' };
+  const row = document.createElement('div');
+  row.className = 'flex gap-2';
+  row.innerHTML =
+    `<span class="text-zinc-400 shrink-0">${new Date().toISOString().slice(11,23)}</span>` +
+    `<span class="${colors[type]||'text-zinc-600'}">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+  const panel = q('log');
+  panel.appendChild(row);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function setDot(s) {
+  const colors = { READY:'#22c55e', RECEIVING:'#a855f7', ERROR:'#ef4444', CLOSED:'#d4d4d8' };
+  q('dot').style.background = colors[s] || '#fbbf24';
+  q('dot').className = `w-2 h-2 rounded-full shrink-0${!colors[s] ? ' animate-pulse' : ''}`;
+  q('state-txt').textContent = s;
+}
+
+const receiver = new ArrowChildReceiver({ allowedOrigins: ['*'] });
+
+receiver
+  .onStateChange((next, prev) => {
+    setDot(next);
+    log(`${prev} → ${next}`, 'info');
+    if (next === State.READY) log('Handshake complete', 'ok');
+    try { window.parent.postMessage({ __iframeFlight:'log', msg:`${prev} → ${next}`, type:'info', state:next, sourceId:'quickstart' }, '*'); } catch(_){}
+  })
+  .onData(result => {
+    const summary = `📥 [${result.format}] rows=${result.rows} cols=${result.cols} ${result.processingTime}ms`;
+    log(summary, 'recv');
+    try { window.parent.postMessage({ __iframeFlight:'log', msg:summary, type:'recv', state:receiver.getState(), sourceId:'quickstart' }, '*'); } catch(_){}
+    const preview = q('preview');
+    preview.className = preview.className.replace('text-zinc-400','text-purple-700');
+    if (result.data !== undefined) {
+      preview.textContent = JSON.stringify(result.data, null, 2).slice(0, 250);
+    } else if (result.table) {
+      const t = result.table;
+      const lines = [`Arrow ${result.rows}×${result.cols}`];
+      for (let r = 0; r < Math.min(result.rows, 3); r++) {
+        const obj = {};
+        t.schema.fields.forEach((f, ci) => { obj[f.name] = t.getChildAt(ci).get(r); });
+        lines.push('  ' + JSON.stringify(obj));
+      }
+      if (result.rows > 3) lines.push(`  …(${result.rows-3} more)`);
+      preview.textContent = lines.join('\n');
+    }
+  })
+  .onError(err => {
+    log(`❌ ${err.message}`, 'err');
+  });
+</script>
+</body>
+</html>

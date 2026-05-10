@@ -26,6 +26,7 @@
 <nav class="flex gap-0 border-b border-zinc-200 mb-6" id="nav">
   <a href="#" class="nav-link shrink-0 px-4 py-2 text-sm font-semibold border-b-2 border-blue-600 text-blue-700 -mb-px">Demo</a>
   <a href="#simple" class="nav-link shrink-0 px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-zinc-500 hover:text-zinc-800 -mb-px transition-colors">Quick start</a>
+  <a href="#chart" class="nav-link shrink-0 px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-zinc-500 hover:text-zinc-800 -mb-px transition-colors">Visualization</a>
 </nav>
 
 <!-- ══════════════════════════════════════════════
@@ -399,7 +400,7 @@ receiver.<span class="fn">onData</span>(<span class="kw">async</span> (result) =
         <div class="px-4 py-3 bg-zinc-50 border-b border-zinc-200">
           <span class="text-sm font-semibold text-zinc-800">Child iframe</span>
         </div>
-        <iframe id="qs-frame" src="./child.html?sourceId=quickstart" sandbox="allow-scripts"
+        <iframe id="qs-frame" src="./child-simple.html" sandbox="allow-scripts"
           class="block w-full h-[200px] bg-zinc-50 border-0"></iframe>
       </div>
     </div>
@@ -414,10 +415,14 @@ receiver.<span class="fn">onData</span>(<span class="kw">async</span> (result) =
             Copy
           </button>
         </div>
-        <pre id="qs-code-parent" class="p-4 text-[13px] leading-relaxed font-mono bg-white overflow-x-auto"><span class="kw">import</span> { <span class="obj">ArrowParentEmitter</span>, <span class="fn">tableFromArrays</span>, <span class="fn">tableToIPC</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+        <pre id="qs-code-parent" class="p-4 text-[13px] leading-relaxed font-mono bg-white overflow-x-auto"><span class="cm">&lt;!-- parent.html — no npm install needed --&gt;</span>
+<span class="kw">&lt;script</span> <span class="fn">type</span>=<span class="str">"importmap"</span><span class="kw">&gt;</span>
+  {<span class="str">"imports"</span>: {<span class="str">"iframe-flight"</span>: <span class="str">"https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"</span>}}
+<span class="kw">&lt;/script&gt;</span>
+<span class="kw">&lt;script</span> <span class="fn">type</span>=<span class="str">"module"</span><span class="kw">&gt;</span>
+<span class="kw">import</span> { <span class="obj">ArrowParentEmitter</span>, <span class="fn">tableFromArrays</span>, <span class="fn">tableToIPC</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
 
-<span class="kw">const</span> iframe  = document.<span class="fn">querySelector</span>(<span class="str">'iframe'</span>);
-<span class="kw">const</span> emitter = <span class="kw">new</span> <span class="obj">ArrowParentEmitter</span>(iframe);
+<span class="kw">const</span> emitter = <span class="kw">new</span> <span class="obj">ArrowParentEmitter</span>(document.<span class="fn">querySelector</span>(<span class="str">'iframe'</span>));
 
 emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
   <span class="kw">const</span> table = <span class="fn">tableFromArrays</span>({
@@ -427,7 +432,8 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
   });
   <span class="kw">const</span> ack = <span class="kw">await</span> emitter.<span class="fn">send</span>(<span class="fn">tableToIPC</span>(table));
   console.<span class="fn">log</span>(`rows=${ack.rows} zeroCopy=${ack.isZeroCopy}`);
-});</pre>
+});
+<span class="kw">&lt;/script&gt;</span></pre>
       </div>
       <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden">
         <div class="flex items-center justify-between px-4 py-2 bg-zinc-50 border-b border-zinc-200">
@@ -437,21 +443,118 @@ emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
             Copy
           </button>
         </div>
-        <pre id="qs-code-child" class="p-4 text-[13px] leading-relaxed font-mono bg-white overflow-x-auto"><span class="kw">import</span> { <span class="obj">ArrowChildReceiver</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+        <pre id="qs-code-child" class="p-4 text-[13px] leading-relaxed font-mono bg-white overflow-x-auto"><span class="cm">&lt;!-- child.html — same CDN, no install --&gt;</span>
+<span class="kw">&lt;script</span> <span class="fn">type</span>=<span class="str">"importmap"</span><span class="kw">&gt;</span>
+  {<span class="str">"imports"</span>: {<span class="str">"iframe-flight"</span>: <span class="str">"https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"</span>}}
+<span class="kw">&lt;/script&gt;</span>
+<span class="kw">&lt;script</span> <span class="fn">type</span>=<span class="str">"module"</span><span class="kw">&gt;</span>
+<span class="kw">import</span> { <span class="obj">ArrowChildReceiver</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
 
 <span class="kw">const</span> receiver = <span class="kw">new</span> <span class="obj">ArrowChildReceiver</span>();
 
 receiver.<span class="fn">onData</span>((result) => {
   <span class="cm">// result.table  → Apache Arrow Table</span>
   <span class="cm">// result.data   → plain JS value (JSON mode)</span>
-  <span class="cm">// result.rows / .cols / .isZeroCopy / …</span>
   console.<span class="fn">log</span>(result.table.<span class="fn">toArray</span>());
-});</pre>
+});
+<span class="kw">&lt;/script&gt;</span></pre>
       </div>
     </div>
   </div>
 
 </div><!-- /page-simple -->
+
+<!-- ══════════════════════════════════════════════
+     PAGE: VISUALIZATION
+══════════════════════════════════════════════ -->
+<div data-page="chart" hidden>
+
+  <p class="text-sm text-zinc-500 mb-4">Push columnar data from your app into an embedded chart widget — no shared state, no coupling. The parent generates an Arrow table; the child renders it live with <a href="https://vega.github.io/vega-lite/" target="_blank" class="text-blue-600 hover:underline">Vega-Lite</a>.</p>
+
+  <!-- Controls -->
+  <div class="flex flex-wrap items-center gap-3 px-4 py-3 bg-white border border-zinc-200 rounded-lg mb-3">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold text-zinc-500 shrink-0">Rows:</span>
+      <input type="range" id="chart-rows" min="4" max="15" value="10" class="w-28 accent-blue-600">
+      <span id="chart-rows-val" class="font-mono text-xs text-zinc-600 w-4">10</span>
+    </div>
+    <span id="chart-meta" class="font-mono text-[11px] text-zinc-400">—</span>
+    <button id="chart-send" disabled
+      class="ml-auto px-4 py-1.5 rounded text-sm font-semibold border bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+      Push new snapshot
+    </button>
+  </div>
+
+  <!-- Chart iframe -->
+  <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden mb-4">
+    <iframe id="chart-frame" src="./child-chart.html" sandbox="allow-scripts"
+      class="block w-full h-[460px] border-0"></iframe>
+  </div>
+
+  <!-- Code -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden">
+      <div class="px-4 py-2 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
+        <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Parent — push data</span>
+        <button class="copy-btn flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold bg-white text-zinc-500 border border-zinc-200 hover:text-zinc-800 transition-colors" data-target="chart-code-parent">
+          <svg class="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="chart-code-parent" class="p-4 text-[13px] leading-relaxed font-mono bg-white overflow-x-auto"><span class="kw">import</span> { <span class="obj">ArrowParentEmitter</span>, <span class="fn">tableFromArrays</span>, <span class="fn">tableToIPC</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="kw">const</span> PRODUCTS = [<span class="str">'Aurora'</span>, <span class="str">'Beacon'</span>, <span class="str">'Catalyst'</span>, <span class="str">'Dynamo'</span>, <span class="cm">/* … */</span>];
+
+<span class="kw">function</span> <span class="fn">makeSnapshot</span>(n) {
+  <span class="kw">const</span> products = PRODUCTS.<span class="fn">slice</span>(<span class="num">0</span>, n);
+  <span class="kw">const</span> revenue  = Float64Array.<span class="fn">from</span>(products.<span class="fn">map</span>(() => <span class="fn">rand</span>(<span class="num">10</span>, <span class="num">100</span>)));
+  <span class="kw">const</span> growth   = Float64Array.<span class="fn">from</span>(products.<span class="fn">map</span>(() => <span class="fn">rand</span>(<span class="num">-25</span>, <span class="num">25</span>)));
+  <span class="kw">const</span> units    = Int32Array.<span class="fn">from</span>(products.<span class="fn">map</span>(() => <span class="fn">randInt</span>(<span class="num">5000</span>, <span class="num">50000</span>)));
+  <span class="kw">return</span> <span class="fn">tableToIPC</span>(<span class="fn">tableFromArrays</span>({ product: products, revenue, growth, units }));
+}
+
+<span class="kw">const</span> emitter = <span class="kw">new</span> <span class="obj">ArrowParentEmitter</span>(iframe);
+emitter.<span class="fn">onReady</span>(<span class="kw">async</span> () => {
+  <span class="kw">const</span> ack = <span class="kw">await</span> emitter.<span class="fn">send</span>(<span class="fn">makeSnapshot</span>(<span class="num">10</span>));
+  console.<span class="fn">log</span>(`${ack.rows} rows · ${ack.processingTime}ms`);
+});</pre>
+    </div>
+    <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden">
+      <div class="px-4 py-2 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
+        <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Child iframe — render chart</span>
+        <button class="copy-btn flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold bg-white text-zinc-500 border border-zinc-200 hover:text-zinc-800 transition-colors" data-target="chart-code-child">
+          <svg class="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="chart-code-child" class="p-4 text-[13px] leading-relaxed font-mono bg-white overflow-x-auto"><span class="kw">import</span> { <span class="obj">ArrowChildReceiver</span> } <span class="kw">from</span> <span class="str">'iframe-flight'</span>;
+
+<span class="kw">const</span> receiver = <span class="kw">new</span> <span class="obj">ArrowChildReceiver</span>({ allowedOrigins: [<span class="str">'*'</span>] });
+
+receiver.<span class="fn">onData</span>(result => {
+  <span class="cm">// Convert Arrow columnar → row objects</span>
+  <span class="kw">const</span> rows = [];
+  <span class="kw">const</span> t = result.table;
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; t.numRows; i++) {
+    <span class="kw">const</span> row = {};
+    t.schema.fields.<span class="fn">forEach</span>((f, ci) => {
+      row[f.name] = t.<span class="fn">getChildAt</span>(ci).<span class="fn">get</span>(i);
+    });
+    rows.<span class="fn">push</span>(row);
+  }
+  <span class="cm">// Render with Vega-Lite — works with any Arrow schema</span>
+  <span class="fn">vegaEmbed</span>(<span class="str">'#chart'</span>, {
+    data:     { values: rows },
+    mark:     { type: <span class="str">'bar'</span>, cornerRadiusEnd: <span class="num">4</span> },
+    encoding: { y: { field: <span class="str">'product'</span>, sort: <span class="str">'-x'</span> },
+                x: { field: <span class="str">'revenue'</span>, type: <span class="str">'quantitative'</span> },
+                color: { field: <span class="str">'growth'</span>, scale: { scheme: <span class="str">'redyellowgreen'</span> } } }
+  }, { actions: <span class="kw">false</span> });
+});</pre>
+    </div>
+  </div>
+
+</div><!-- /page-chart -->
 
 <!-- Footer -->
 <footer class="mt-6 text-xs text-zinc-400 pb-4 border-t border-zinc-200 pt-4">
@@ -662,6 +765,42 @@ document.querySelectorAll('input[name="mode-alpha"]').forEach(r=>r.addEventListe
 document.querySelectorAll('input[name="mode-beta"]').forEach(r=>r.addEventListener('change',()=>{styleRadios('.mode-opt','border-green-500');reloadChild('frame-beta','log-beta','beta-dot','beta-state','child-beta','btn-resume-beta',()=>emitterBeta,ne=>emitterBeta=ne);}));
 q('btn-resume-alpha').addEventListener('click',()=>{ q('frame-alpha').contentWindow.postMessage({__iframeFlight:'resume'},'*'); q('btn-resume-alpha').disabled=true; appendLog('parent-log','▶ resume → child-alpha','info'); });
 q('btn-resume-beta').addEventListener('click',()=>{ q('frame-beta').contentWindow.postMessage({__iframeFlight:'resume'},'*'); q('btn-resume-beta').disabled=true; appendLog('parent-log','▶ resume → child-beta','info'); });
+
+/* ══ CHART PAGE EMITTER ══ */
+const CHART_PRODUCTS = ['Aurora','Beacon','Catalyst','Dynamo','Ember','Forge','Helios','Iris','Jetstream','Kronos','Lumina','Meridian','Nexus','Orbit','Prism'];
+
+function makeChartData(n) {
+  const products = CHART_PRODUCTS.slice(0, n);
+  const revenue  = Float64Array.from(products.map(() => +(Math.random()*90+10).toFixed(1)));
+  const growth   = Float64Array.from(products.map(() => +(Math.random()*50-25).toFixed(1)));
+  const units    = Int32Array.from(products.map(() => Math.floor(Math.random()*45000+5000)));
+  return tableToIPC(tableFromArrays({ product: products, revenue, growth, units }));
+}
+
+const chartRowsSlider = q('chart-rows');
+const chartRowsVal    = q('chart-rows-val');
+chartRowsSlider.addEventListener('input', () => { chartRowsVal.textContent = chartRowsSlider.value; });
+
+let chartEmitter = new ArrowParentEmitter(q('chart-frame'), { handshakeTimeout:10000, ackTimeout:6000, allowedOrigins:['*'] });
+chartEmitter
+  .onStateChange((next) => {
+    if (next === State.READY) {
+      q('chart-send').disabled = false;
+      doChartSend();
+    }
+  })
+  .onError(err => { q('chart-meta').textContent = `❌ ${err.message}`; });
+
+function doChartSend() {
+  const buf = makeChartData(parseInt(chartRowsSlider.value, 10));
+  const t0 = performance.now();
+  chartEmitter.send(buf).then(ack => {
+    const rtt = Math.round(performance.now() - t0);
+    q('chart-meta').textContent = `${ack.rows} rows · ${ack.cols} cols · ${ack.processingTime}ms transfer · ${rtt}ms RTT`;
+  }).catch(err => { q('chart-meta').textContent = `❌ ${err.message}`; });
+}
+
+q('chart-send').addEventListener('click', doChartSend);
 
 /* ══ QUICK START PAGE EMITTER ══ */
 let qsEmitter = new ArrowParentEmitter(q('qs-frame'), { handshakeTimeout:8000, ackTimeout:5000, allowedOrigins:['*'] });
