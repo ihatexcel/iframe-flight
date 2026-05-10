@@ -1,307 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>iframe-flight child</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:     #0d1117; --surface: #161b22; --border: #30363d;
-      --muted:  #8b949e; --text:    #c9d1d9;
-      --green:  #3fb950; --accent:  #58a6ff; --red:    #f85149;
-      --yellow: #d29922; --purple:  #bc8cff; --orange: #e3b341;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text);
-      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-    }
-
-    /* ── Top bar ── */
-    .top-bar {
-      padding: 0.4rem 0.65rem;
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 0.4rem;
-      font-size: 0.68rem; font-weight: 600; flex-shrink: 0;
-    }
-    .dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--yellow); animation: pulse 1.2s infinite; flex-shrink: 0;
-    }
-    .dot.ready   { background: var(--green);  animation: none; box-shadow: 0 0 5px var(--green); }
-    .dot.recv    { background: var(--purple); animation: none; box-shadow: 0 0 5px var(--purple); }
-    .dot.error   { background: var(--red);    animation: none; }
-    .dot.closed  { background: var(--muted);  animation: none; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-    /* Source ID chip */
-    .source-id {
-      font-family: 'SFMono-Regular', 'Fira Code', monospace;
-      font-size: 0.62rem; font-weight: 700;
-      background: #1f3a5f; color: var(--accent);
-      border: 1px solid #388bfd33;
-      padding: .1rem .45rem; border-radius: 4px;
-      letter-spacing: .02em;
-    }
-    .mode-badge {
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-      padding: .1rem .4rem; border-radius: 4px;
-    }
-    .mode-continuous { background: #1c2f1c; color: var(--green);  border: 1px solid #3fb95033; }
-    .mode-first      { background: #2d2a1a; color: var(--orange); border: 1px solid #e3b34133; }
-
-    .listen-state {
-      margin-left: auto; font-size: 0.62rem; font-weight: 600;
-      display: flex; align-items: center; gap: 0.25rem;
-    }
-    .listen-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 4px var(--green); }
-    .listen-dot.paused { background: var(--muted); box-shadow: none; }
-
-    /* ── Handshake ── */
-    .hs-bar {
-      padding: 0.3rem 0.65rem; border-bottom: 1px solid var(--border);
-      font-size: 0.65rem; color: var(--muted);
-      display: flex; align-items: center; gap: 0.3rem; flex-shrink: 0;
-    }
-    .hs-bar span { transition: color .25s; }
-    .hs-bar .done { color: var(--green); }
-    .hs-bar .sep  { color: var(--border); }
-
-    /* ── Log ── */
-    .log {
-      font-family: 'SFMono-Regular', 'Fira Code', monospace;
-      font-size: 0.67rem; padding: 0.45rem 0.65rem;
-      flex: 1; overflow-y: auto;
-      display: flex; flex-direction: column; gap: 0.15rem;
-      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
-    }
-    .log-row { display: grid; grid-template-columns: 4.8rem 1fr; gap: 0.25rem; line-height: 1.45; }
-    .log-ts  { color: var(--muted); }
-    .log-msg { color: var(--text); word-break: break-all; }
-    .log-row.ok   .log-msg { color: var(--green); }
-    .log-row.err  .log-msg { color: var(--red); }
-    .log-row.info .log-msg { color: var(--accent); }
-    .log-row.recv .log-msg { color: var(--purple); }
-    .log-row.warn .log-msg { color: var(--orange); }
-
-    /* ── Controls ── */
-    .controls {
-      padding: 0.35rem 0.65rem; border-top: 1px solid var(--border);
-      display: flex; gap: 0.4rem; flex-shrink: 0; align-items: center;
-      font-size: 0.68rem;
-    }
-    .ctrl-label { color: var(--muted); font-weight: 600; font-size: 0.65rem; }
-    button.reply-btn {
-      padding: .25rem .6rem; border-radius: 5px; border: 1px solid #bc8cff33;
-      background: #2a1a3d; color: var(--purple); font-size: 0.68rem; font-weight: 600;
-      cursor: pointer; transition: opacity .15s;
-    }
-    button.reply-btn:disabled { opacity: .35; cursor: not-allowed; }
-
-    /* ── Preview ── */
-    .preview {
-      padding: 0.4rem 0.65rem; border-top: 1px solid var(--border);
-      font-family: 'SFMono-Regular', monospace; font-size: 0.65rem;
-      color: var(--muted); background: #080c10;
-      white-space: pre-wrap; word-break: break-all;
-      max-height: 64px; overflow: auto; flex-shrink: 0;
-    }
-    .preview.has-data { color: var(--purple); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .blink { animation: blink 1.2s ease-in-out infinite; }
+    ::-webkit-scrollbar { width:4px } ::-webkit-scrollbar-thumb { background:#3f3f46; border-radius:2px }
   </style>
 </head>
-<body>
+<body class="bg-zinc-950 text-zinc-300 h-screen flex flex-col overflow-hidden text-[12.5px] font-sans">
 
-  <div class="top-bar">
-    <div class="dot" id="dot"></div>
-    <span id="state-txt">CONNECTING</span>
-    <span class="source-id" id="source-id-chip">…</span>
-    <span class="mode-badge" id="mode-badge">…</span>
-    <div class="listen-state">
-      <div class="listen-dot" id="listen-dot"></div>
+  <!-- Status bar -->
+  <header class="flex items-center gap-2 px-3 py-2 bg-zinc-900 border-b border-zinc-800 shrink-0">
+    <span id="dot" class="w-2 h-2 rounded-full bg-yellow-400 blink shrink-0"></span>
+    <span id="state-txt" class="font-semibold text-zinc-200 text-xs tracking-wide">CONNECTING</span>
+    <code id="source-id-chip" class="font-mono text-[11px] font-bold px-1.5 py-px rounded bg-blue-950/60 text-blue-400 border border-blue-900/50 leading-none">…</code>
+    <span id="mode-badge" class="text-[10px] font-bold px-1.5 py-px rounded leading-none"></span>
+    <div class="ml-auto flex items-center gap-1.5 text-[11px] text-zinc-500">
+      <span id="listen-dot" class="w-1.5 h-1.5 rounded-full bg-green-500" style="box-shadow:0 0 4px #22c55e"></span>
       <span id="listen-label">listening</span>
     </div>
-  </div>
+  </header>
 
-  <div class="hs-bar">
+  <!-- Handshake -->
+  <div class="flex items-center gap-1 px-3 py-1 border-b border-zinc-800 text-[11px] text-zinc-600 shrink-0 font-mono">
     <span id="hs-sent">⬜ CHILD_READY</span>
-    <span class="sep">→</span>
+    <span class="text-zinc-800 mx-1">→</span>
     <span id="hs-ack">⬜ PARENT_ACK</span>
-    <span class="sep">→</span>
+    <span class="text-zinc-800 mx-1">→</span>
     <span id="hs-ready">⬜ Ready</span>
   </div>
 
-  <div class="log" id="log"></div>
+  <!-- Log -->
+  <div id="log" class="flex-1 overflow-y-auto px-3 py-2 font-mono text-[11px] flex flex-col gap-px leading-relaxed"></div>
 
-  <div class="controls">
-    <span class="ctrl-label">↑ Reverse channel:</span>
-    <button class="reply-btn" id="btn-reply" disabled>Reply to parent (raw postMessage)</button>
+  <!-- Controls -->
+  <div class="px-3 py-2 border-t border-zinc-800 flex items-center gap-2 shrink-0">
+    <span class="text-[11px] text-zinc-500">↑ Reverse channel:</span>
+    <button id="btn-reply" disabled
+      class="px-2.5 py-1 text-[11px] font-semibold rounded border
+             bg-purple-950/60 text-purple-300 border-purple-900/60
+             hover:bg-purple-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+      Reply to parent
+    </button>
   </div>
 
-  <div class="preview" id="preview">No data received yet.</div>
+  <!-- Preview -->
+  <div id="preview"
+    class="px-3 py-2 border-t border-zinc-800 font-mono text-[11px] text-zinc-600 max-h-14 overflow-auto shrink-0 whitespace-pre-wrap break-all">
+    No data received yet.
+  </div>
 
-<script type="importmap">
-{"imports": {"iframe-flight": "./iframe-flight.esm.js"}}
-</script>
+<script type="importmap">{"imports": {"iframe-flight": "./iframe-flight.esm.js"}}</script>
 <script type="module">
-  import { ArrowChildReceiver, ListenMode, State } from 'iframe-flight';
+import { ArrowChildReceiver, ListenMode, State } from 'iframe-flight';
 
-  const params    = new URLSearchParams(window.location.search);
-  const sourceId  = params.get('sourceId') || ('child-' + Math.random().toString(36).slice(2, 7));
-  const isFirst   = params.get('mode') === 'first';
-  const delay     = parseInt(params.get('delay') || '0', 10);
-  const listenMode = isFirst ? ListenMode.FIRST_MESSAGE : ListenMode.CONTINUOUS;
+const params     = new URLSearchParams(window.location.search);
+const sourceId   = params.get('sourceId') || ('child-' + Math.random().toString(36).slice(2, 7));
+const isFirst    = params.get('mode') === 'first';
+const delay      = parseInt(params.get('delay') || '0', 10);
+const listenMode = isFirst ? ListenMode.FIRST_MESSAGE : ListenMode.CONTINUOUS;
 
-  /* ── DOM ── */
-  function q(id) { return document.getElementById(id); }
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-  function log(msg, type) {
-    const panel = q('log');
-    const now   = new Date().toISOString().slice(11, 23);
-    const row   = document.createElement('div');
-    row.className = 'log-row' + (type ? ' ' + type : '');
-    row.innerHTML = '<span class="log-ts">' + now + '</span><span class="log-msg">' + escHtml(msg) + '</span>';
-    panel.appendChild(row);
-    panel.scrollTop = panel.scrollHeight;
-  }
-  function relay(msg, type, state, meta) {
-    try {
-      window.parent.postMessage({ __iframeFlight: 'log', msg, type, state, sourceId, meta }, '*');
-    } catch(_) {}
-  }
+const q = id => document.getElementById(id);
 
-  /* Init display */
-  q('source-id-chip').textContent = sourceId;
-  const badge = q('mode-badge');
-  badge.textContent = isFirst ? 'FIRST_MESSAGE' : 'CONTINUOUS' + (delay ? ' ' + delay + 'ms' : '');
-  badge.className   = 'mode-badge ' + (isFirst ? 'mode-first' : 'mode-continuous');
+function log(msg, type) {
+  const panel = q('log');
+  const row   = document.createElement('div');
+  row.className = 'flex gap-2';
+  const colors = { ok:'text-green-400', err:'text-red-400', info:'text-blue-400', recv:'text-purple-400', warn:'text-amber-400' };
+  row.innerHTML =
+    `<span class="text-zinc-600 shrink-0">${new Date().toISOString().slice(11,23)}</span>` +
+    `<span class="${colors[type] || 'text-zinc-400'}">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+  panel.appendChild(row);
+  panel.scrollTop = panel.scrollHeight;
+}
 
-  function setDot(s) {
-    const map = { READY:'ready', RECEIVING:'recv', ERROR:'error', CLOSED:'closed' };
-    q('dot').className   = 'dot ' + (map[s] || '');
-    q('state-txt').textContent = s;
-  }
-  function setListenActive(active) {
-    q('listen-dot').className   = 'listen-dot' + (active ? '' : ' paused');
-    q('listen-label').textContent = active ? 'listening' : 'paused';
-  }
-  function hsStep(id) {
-    const el = q(id);
-    el.textContent = el.textContent.replace('⬜', '✅');
-    el.className   = 'done';
-  }
+function relay(msg, type, state, meta) {
+  try { window.parent.postMessage({ __iframeFlight:'log', msg, type, state, sourceId, meta }, '*'); } catch(_){}
+}
 
-  /* ── Receiver ── */
-  const receiver = new ArrowChildReceiver({ listenMode, listenDelay: delay, allowedOrigins: ['*'], sourceId });
+// Init
+q('source-id-chip').textContent = sourceId;
+const badge = q('mode-badge');
+if (isFirst) {
+  badge.textContent = 'FIRST_MESSAGE';
+  badge.className += ' bg-amber-950/60 text-amber-400 border border-amber-900/50';
+} else {
+  badge.textContent = 'CONTINUOUS' + (delay ? ` ${delay}ms` : '');
+  badge.className += ' bg-green-950/60 text-green-400 border border-green-900/50';
+}
 
-  log('Init — sourceId: ' + sourceId, 'info');
-  log('CHILD_READY → parent', 'info');
-  relay('CHILD_READY sent', 'info', State.CONNECTING);
-  hsStep('hs-sent');
+function setDot(s) {
+  const cfg = {
+    READY:     { bg:'bg-green-500',  glow:'0 0 5px #22c55e', anim:false },
+    RECEIVING: { bg:'bg-purple-500', glow:'0 0 5px #a855f7', anim:false },
+    ERROR:     { bg:'bg-red-500',    glow:'none',             anim:false },
+    CLOSED:    { bg:'bg-zinc-600',   glow:'none',             anim:false },
+  }[s] || { bg:'bg-yellow-400', glow:'none', anim:true };
+  const el = q('dot');
+  el.className = `w-2 h-2 rounded-full shrink-0 ${cfg.bg}${cfg.anim ? ' blink' : ''}`;
+  el.style.boxShadow = cfg.glow;
+  q('state-txt').textContent = s;
+}
 
-  receiver
-    .onStateChange((next, prev) => {
-      setDot(next);
-      log('State: ' + prev + ' → ' + next, 'info');
-      relay('State: ' + prev + ' → ' + next, 'info', next);
-      if (next === State.READY && prev === State.CONNECTING) {
-        hsStep('hs-ack'); hsStep('hs-ready');
-        log('✅ Handshake complete', 'ok');
-        relay('✅ Handshake complete', 'ok', next);
-        q('btn-reply').disabled = false;
-      }
-    })
-    .onData((result) => {
-      const mode    = result.isZeroCopy ? '⚡ zero-copy' : 'copy';
-      const summary = '📥 [' + result.format + '] ' + mode +
-        ' rows=' + result.rows + ' cols=' + result.cols +
-        ' size=' + result.size + 'B time=' + result.processingTime + 'ms';
-      log(summary, 'recv');
+function setListenActive(active) {
+  const d = q('listen-dot');
+  d.style.background   = active ? '#22c55e' : '#52525b';
+  d.style.boxShadow    = active ? '0 0 4px #22c55e' : 'none';
+  q('listen-label').textContent = active ? 'listening' : 'paused';
+}
 
-      /* metadata shown in parent inspector */
-      relay(summary, 'recv', receiver.getState(), {
-        messageId:     result.messageId,
-        timestamp:     result.timestamp,
-        correlationId: result.correlationId,
-        format:        result.format,
-        rows:          result.rows,
-        cols:          result.cols,
-        size:          result.size,
-        processingTime: result.processingTime,
-        isZeroCopy:    result.isZeroCopy,
-        schema:        result.schema || null,
-        receivedAt:    Date.now(),
-        receiver:      sourceId,
-      });
+function hsStep(id) {
+  const el = q(id);
+  el.textContent = el.textContent.replace('⬜','✅');
+  el.className = 'text-green-500';
+}
 
-      /* preview */
-      const preview = q('preview');
-      preview.className = 'preview has-data';
-      if (result.data !== undefined) {
-        preview.textContent = JSON.stringify(result.data, null, 2).slice(0, 300);
-      } else if (result.table) {
-        const t = result.table;
-        const lines = ['Arrow: ' + result.rows + ' × ' + result.cols + '  zeroCopy=' + result.isZeroCopy];
-        for (let r = 0; r < Math.min(result.rows, 3); r++) {
-          const obj = {};
-          for (let c = 0; c < t.schema.fields.length; c++)
-            obj[t.schema.fields[c].name] = t.getChildAt(c).get(r);
-          lines.push('  ' + JSON.stringify(obj));
-        }
-        if (result.rows > 3) lines.push('  … (' + (result.rows - 3) + ' more)');
-        preview.textContent = lines.join('\n');
-      }
+const receiver = new ArrowChildReceiver({ listenMode, listenDelay: delay, allowedOrigins: ['*'], sourceId });
 
-      if (isFirst) {
-        setListenActive(false);
-        log('⏸ Paused after FIRST_MESSAGE', 'warn');
-        relay('⏸ Paused — awaiting resumeListening()', 'warn', receiver.getState());
-      }
-    })
-    .onError((err) => {
-      log('❌ ' + err.message, 'err');
-      relay('❌ ' + err.message, 'err', receiver.getState());
+log(`Init — sourceId: ${sourceId}`, 'info');
+log('CHILD_READY → parent', 'info');
+relay('CHILD_READY sent', 'info', State.CONNECTING);
+hsStep('hs-sent');
+
+receiver
+  .onStateChange((next, prev) => {
+    setDot(next);
+    log(`State: ${prev} → ${next}`, 'info');
+    relay(`State: ${prev} → ${next}`, 'info', next);
+    if (next === State.READY && prev === State.CONNECTING) {
+      hsStep('hs-ack'); hsStep('hs-ready');
+      log('✅ Handshake complete', 'ok');
+      relay('✅ Handshake complete', 'ok', next);
+      q('btn-reply').disabled = false;
+    }
+  })
+  .onData((result) => {
+    const mode    = result.isZeroCopy ? '⚡ zero-copy' : 'copy';
+    const summary = `📥 [${result.format}] ${mode} rows=${result.rows} cols=${result.cols} size=${result.size}B time=${result.processingTime}ms`;
+    log(summary, 'recv');
+    relay(summary, 'recv', receiver.getState(), {
+      messageId: result.messageId, timestamp: result.timestamp, correlationId: result.correlationId,
+      format: result.format, rows: result.rows, cols: result.cols, size: result.size,
+      processingTime: result.processingTime, isZeroCopy: result.isZeroCopy,
+      schema: result.schema || null, receivedAt: Date.now(), receiver: sourceId,
     });
 
-  /* ── Reverse channel: child → parent (raw postMessage) ── */
-  q('btn-reply').addEventListener('click', () => {
-    const msgId = 'reply-' + Date.now();
-    const payload = {
-      __iframeFlight: 'child-reply',
-      sourceId,
-      messageId: msgId,
-      timestamp: Date.now(),
-      data: { text: 'Hello from ' + sourceId, ts: Date.now() },
-    };
-    window.parent.postMessage(payload, '*');
-    log('↑ Sent reply to parent (raw postMessage)', 'ok');
-    relay('↑ Reply sent to parent', 'ok', receiver.getState(), {
-      messageId: msgId, timestamp: payload.timestamp, source: sourceId, target: 'parent',
-    });
+    const preview = q('preview');
+    preview.className = preview.className.replace('text-zinc-600','text-purple-400');
+    if (result.data !== undefined) {
+      preview.textContent = JSON.stringify(result.data, null, 2).slice(0, 300);
+    } else if (result.table) {
+      const t = result.table;
+      const lines = [`Arrow: ${result.rows} × ${result.cols}  zeroCopy=${result.isZeroCopy}`];
+      for (let r = 0; r < Math.min(result.rows, 3); r++) {
+        const obj = {};
+        for (let c = 0; c < t.schema.fields.length; c++)
+          obj[t.schema.fields[c].name] = t.getChildAt(c).get(r);
+        lines.push('  ' + JSON.stringify(obj));
+      }
+      if (result.rows > 3) lines.push(`  … (${result.rows - 3} more)`);
+      preview.textContent = lines.join('\n');
+    }
+
+    if (isFirst) {
+      setListenActive(false);
+      log('⏸ Paused after FIRST_MESSAGE', 'warn');
+      relay('⏸ Paused — awaiting resumeListening()', 'warn', receiver.getState());
+    }
+  })
+  .onError((err) => {
+    log(`❌ ${err.message}`, 'err');
+    relay(`❌ ${err.message}`, 'err', receiver.getState());
   });
 
-  /* ── Commands from parent ── */
-  window.addEventListener('message', (e) => {
-    if (!e.data) return;
-    if (e.data.__iframeFlight === 'resume') {
-      receiver.resumeListening();
-      setListenActive(true);
-      log('▶ resumeListening() called', 'ok');
-      relay('▶ resumeListening()', 'ok', receiver.getState());
-    }
-    /* Relay: parent forwards a message originally from another child */
-    if (e.data.__iframeFlight === 'relay') {
-      log('📨 Relayed from ' + e.data.from + ': ' + JSON.stringify(e.data.payload).slice(0, 80), 'recv');
-      relay('📨 Relayed from ' + e.data.from, 'recv', receiver.getState(), {
-        relayedFrom: e.data.from, payload: e.data.payload
-      });
-      const preview = q('preview');
-      preview.className = 'preview has-data';
-      preview.textContent = 'RELAY from ' + e.data.from + ':\n' + JSON.stringify(e.data.payload, null, 2).slice(0, 250);
-    }
-  });
+q('btn-reply').addEventListener('click', () => {
+  const msgId   = 'reply-' + Date.now();
+  const payload = { __iframeFlight:'child-reply', sourceId, messageId:msgId, timestamp:Date.now(), data:{ text:`Hello from ${sourceId}`, ts:Date.now() } };
+  window.parent.postMessage(payload, '*');
+  log('↑ Sent reply to parent', 'ok');
+  relay('↑ Reply sent to parent', 'ok', receiver.getState(), { messageId:msgId, timestamp:payload.timestamp, source:sourceId, target:'parent' });
+});
+
+window.addEventListener('message', (e) => {
+  if (!e.data) return;
+  if (e.data.__iframeFlight === 'resume') {
+    receiver.resumeListening();
+    setListenActive(true);
+    log('▶ resumeListening() called', 'ok');
+    relay('▶ resumeListening()', 'ok', receiver.getState());
+  }
+  if (e.data.__iframeFlight === 'relay') {
+    const from = e.data.from;
+    log(`📨 Relayed from ${from}: ${JSON.stringify(e.data.payload).slice(0,80)}`, 'recv');
+    relay(`📨 Relayed from ${from}`, 'recv', receiver.getState(), { relayedFrom:from, payload:e.data.payload });
+    const preview = q('preview');
+    preview.className = preview.className.replace('text-zinc-600','text-purple-400');
+    preview.textContent = `RELAY from ${from}:\n${JSON.stringify(e.data.payload, null, 2).slice(0, 250)}`;
+  }
+});
 </script>
 </body>
 </html>
