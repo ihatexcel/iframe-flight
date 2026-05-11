@@ -1,117 +1,285 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>iframe-flight × Vega-Lite</title>
+  <title>iframe-flight demo</title>
+
   <script type="importmap">
-    {"imports": {"iframe-flight": "https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"}}
+  {
+    "imports": {
+      "iframe-flight": "https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"
+    }
+  }
   </script>
+
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; }
-    body   { font-family: system-ui, -apple-system, sans-serif; padding: 2rem; background: #fafafa; }
-    h1     { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
-    .bar   { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-    button { padding: 6px 16px; border-radius: 6px; border: 1px solid #e4e4e7;
-             background: #18181b; color: #fff; font-size: 13px; cursor: pointer; }
-    button:disabled { opacity: 0.35; cursor: not-allowed; }
-    #status { font-size: 12px; font-family: monospace; color: #71717a; }
-    iframe  { display: block; width: 100%; height: 480px;
-              border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #111;
+      color: white;
+      font-size: 14px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 560px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      background: white;
+      margin-top: 20px;
+    }
+
+    #status {
+      margin-top: 12px;
+      color: #555;
+    }
   </style>
 </head>
+
 <body>
 
-<h1>iframe-flight × Vega-Lite — single file, no install</h1>
-<div class="bar">
-  <button id="btn" disabled>New snapshot</button>
-  <span id="status">Loading…</span>
-</div>
-<iframe id="frame"></iframe>
+  <h1>iframe-flight — Parent → iframe</h1>
 
-<script type="module">
-import { ArrowParentEmitter, tableFromArrays, tableToIPC } from 'iframe-flight';
+  <button id="sendBtn">
+    Envoyer des données Arrow
+  </button>
 
-// ── Child iframe HTML ─────────────────────────────────────────────────────
-const CHILD = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<script type="importmap">
-{"imports":{"iframe-flight":"https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"}}
-<\/script></head>
-<body style="margin:0;padding:16px;font-family:system-ui">
-<div id="c"></div>
-<script type="module">
-import { ArrowChildReceiver } from 'iframe-flight';
-import vegaEmbed from 'https://cdn.jsdelivr.net/npm/vega-embed@6/+esm';
+  <div id="status"></div>
 
-new ArrowChildReceiver({ allowedOrigins:['*'] }).onData(async result => {
-  const rows = [];
-  const t = result.table;
-  for (let i = 0; i < t.numRows; i++) {
-    const row = {};
-    t.schema.fields.forEach((f, ci) => { row[f.name] = t.getChildAt(ci).get(i); });
-    rows.push(row);
+  <iframe id="chartFrame"></iframe>
+
+  <script type="module">
+
+    import {
+      ArrowParentEmitter,
+      tableFromArrays,
+      tableToIPC
+    } from 'iframe-flight';
+
+    const iframe = document.getElementById('chartFrame');
+    const status = document.getElementById('status');
+
+    // ------------------------------------------------------------------
+    // HTML du child iframe
+    // ------------------------------------------------------------------
+
+    const childHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <script type="importmap">
+  {
+    "imports": {
+      "iframe-flight": "https://ihatexcel.github.io/iframe-flight/iframe-flight.esm.js"
+    }
   }
-  await vegaEmbed('#c', {
-    width: 'container',
-    data: { values: rows },
-    mark: { type: 'bar', cornerRadiusEnd: 5 },
-    encoding: {
-      y: { field: 'product', type: 'nominal', sort: '-x', title: null },
-      x: { field: 'revenue', type: 'quantitative', title: 'Revenue ($M)' },
-      color: { field: 'growth', type: 'quantitative', title: 'Growth %',
-               scale: { scheme: 'redyellowgreen', domain: [-25, 25] } },
-      tooltip: [{ field:'product' }, { field:'revenue', format:'.1f' },
-                { field:'growth', format:'+.1f' }, { field:'units', format:',' }]
-    },
-    config: { view: { stroke: null }, background: '#fff' }
-  }, { actions: false });
-});
-<\/script>
-</body></html>`;
+  <\/script>
 
-// ── Data ──────────────────────────────────────────────────────────────────
-const PRODUCTS = ['Aurora','Beacon','Catalyst','Dynamo','Ember',
-                  'Forge','Galaxy','Helix','Ignite','Jupiter'];
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: white;
+    }
 
-function snapshot() {
-  const p = PRODUCTS;
-  return tableToIPC(tableFromArrays({
-    product: p,
-    revenue: Float64Array.from(p.map(() => Math.random() * 90 + 10)),
-    growth:  Float64Array.from(p.map(() => Math.random() * 50 - 25)),
-    units:   Int32Array.from(p.map(() => Math.floor(Math.random() * 45000 + 5000))),
-  }));
-}
+    h2 {
+      margin-top: 0;
+    }
 
-// ── Wire-up ───────────────────────────────────────────────────────────────
-const frame  = document.getElementById('frame');
-const btn    = document.getElementById('btn');
-const status = document.getElementById('status');
+    #chart {
+      width: 100%;
+    }
+  </style>
+</head>
 
-let emitter = null;
+<body>
 
-// Create the emitter only after the iframe document has loaded,
-// so contentWindow is stable and CHILD_READY is already in-flight.
-frame.addEventListener('load', () => {
-  emitter = new ArrowParentEmitter(frame, { allowedOrigins: ['*'] });
-  emitter
-    .onReady(() => { status.textContent = 'Ready'; btn.disabled = false; push(); })
-    .onError(err => { status.textContent = `❌ ${err.message}`; });
-});
+  <h2>Revenue par produit</h2>
 
-btn.addEventListener('click', push);
+  <div id="chart"></div>
 
-frame.srcdoc = CHILD;
+  <script type="module">
 
-async function push() {
-  btn.disabled = true;
-  status.textContent = 'Sending…';
-  const ack = await emitter.send(snapshot());
-  status.textContent = `${ack.rows} rows · ${ack.processingTime}ms`;
-  btn.disabled = false;
-}
-</script>
+    import { ArrowChildReceiver }
+      from 'iframe-flight';
+
+    import vegaEmbed
+      from 'https://cdn.jsdelivr.net/npm/vega-embed@6/+esm';
+
+    const receiver = new ArrowChildReceiver({
+      allowedOrigins: ['*']
+    });
+
+    receiver.onData(async (result) => {
+
+      const rows = [];
+      const table = result.table;
+
+      for (let i = 0; i < table.numRows; i++) {
+
+        const row = {};
+
+        table.schema.fields.forEach((field, columnIndex) => {
+          row[field.name] =
+            table.getChildAt(columnIndex).get(i);
+        });
+
+        rows.push(row);
+      }
+
+      document.getElementById('chart').innerHTML = '';
+
+      await vegaEmbed(
+        '#chart',
+        {
+          width: 700,
+
+          data: {
+            values: rows
+          },
+
+          mark: {
+            type: 'bar',
+            cornerRadiusEnd: 4
+          },
+
+          encoding: {
+            y: {
+              field: 'product',
+              type: 'nominal',
+              sort: '-x'
+            },
+
+            x: {
+              field: 'revenue',
+              type: 'quantitative'
+            },
+
+            color: {
+              field: 'growth',
+              type: 'quantitative',
+              scale: {
+                scheme: 'redyellowgreen'
+              }
+            }
+          }
+        },
+        {
+          actions: false
+        }
+      );
+    });
+
+  <\/script>
+
+</body>
+</html>
+`;
+
+    iframe.srcdoc = childHtml;
+
+    // ------------------------------------------------------------------
+    // Données Arrow
+    // ------------------------------------------------------------------
+
+    const PRODUCTS = [
+      'Aurora',
+      'Beacon',
+      'Catalyst',
+      'Dynamo',
+      'Eclipse',
+      'Fusion',
+      'Galaxy',
+      'Helix',
+      'Ignite',
+      'Jupiter'
+    ];
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function randInt(min, max) {
+      return Math.floor(rand(min, max));
+    }
+
+    function makeSnapshot(n) {
+
+      const products = PRODUCTS.slice(0, n);
+
+      const revenue = Float64Array.from(
+        products.map(() => rand(10, 100))
+      );
+
+      const growth = Float64Array.from(
+        products.map(() => rand(-25, 25))
+      );
+
+      const units = Int32Array.from(
+        products.map(() => randInt(5000, 50000))
+      );
+
+      return tableToIPC(
+        tableFromArrays({
+          product: products,
+          revenue,
+          growth,
+          units
+        })
+      );
+    }
+
+    // ------------------------------------------------------------------
+    // Communication parent → iframe
+    // ------------------------------------------------------------------
+
+    iframe.addEventListener('load', async () => {
+
+      const emitter = new ArrowParentEmitter(iframe);
+
+      await emitter.onReady();
+
+      status.textContent = 'iframe prête';
+
+      async function sendData() {
+
+        const ack = await emitter.send(
+          makeSnapshot(10)
+        );
+
+        status.textContent =
+          ack.rows +
+          ' rows envoyées · ' +
+          ack.processingTime +
+          'ms';
+      }
+
+      document
+        .getElementById('sendBtn')
+        .addEventListener('click', sendData);
+
+      // premier envoi auto
+      sendData();
+    });
+
+  </script>
 
 </body>
 </html>
