@@ -13,8 +13,15 @@ function makeIframe(): HTMLIFrameElement {
   return iframe;
 }
 
-function dispatchMessage(data: unknown, origin = '*') {
-  window.dispatchEvent(new MessageEvent('message', { data, origin }));
+function dispatchMessage(data: unknown, origin = '*', source?: unknown) {
+  const init: MessageEventInit = { data, origin };
+  if (source !== undefined) init.source = source as MessageEventSource;
+  window.dispatchEvent(new MessageEvent('message', init));
+}
+
+/** Dispatch a message as if it originated from this iframe's contentWindow. */
+function dispatchFromIframe(iframe: HTMLIFrameElement, data: unknown, origin = '*') {
+  dispatchMessage(data, origin, iframe.contentWindow);
 }
 
 describe('ArrowParentEmitter', () => {
@@ -46,7 +53,7 @@ describe('ArrowParentEmitter', () => {
     const readyCb = vi.fn();
     emitter = new ArrowParentEmitter(iframe).onReady(readyCb);
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     expect(emitter.getState()).toBe(State.READY);
     expect(emitter.isReady()).toBe(true);
@@ -57,7 +64,7 @@ describe('ArrowParentEmitter', () => {
     emitter = new ArrowParentEmitter(iframe);
     const postMessage = iframe.contentWindow!.postMessage as ReturnType<typeof vi.fn>;
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     expect(postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: MessageType.PARENT_ACK }),
@@ -79,7 +86,7 @@ describe('ArrowParentEmitter', () => {
     const errorCb = vi.fn();
     emitter = new ArrowParentEmitter(iframe, { handshakeTimeout: 1000 }).onError(errorCb);
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
     vi.advanceTimersByTime(2000);
 
     expect(errorCb).not.toHaveBeenCalled();
@@ -89,15 +96,26 @@ describe('ArrowParentEmitter', () => {
     const readyCb = vi.fn();
     emitter = new ArrowParentEmitter(iframe, { allowedOrigins: ['https://trusted.com'] }).onReady(readyCb);
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION }, 'https://evil.com');
+    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION }, 'https://evil.com', iframe.contentWindow);
     expect(readyCb).not.toHaveBeenCalled();
+  });
+
+  it('ignores CHILD_READY from a different iframe', () => {
+    const readyCb = vi.fn();
+    emitter = new ArrowParentEmitter(iframe).onReady(readyCb);
+
+    const otherIframe = makeIframe();
+    dispatchFromIframe(otherIframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+
+    expect(readyCb).not.toHaveBeenCalled();
+    expect(emitter.getState()).toBe(State.CONNECTING);
   });
 
   it('fires error on protocol version mismatch', () => {
     const errorCb = vi.fn();
     emitter = new ArrowParentEmitter(iframe).onError(errorCb);
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: '99.0.0', messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: '99.0.0', messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     expect(errorCb).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('version mismatch') }));
   });
@@ -111,7 +129,7 @@ describe('ArrowParentEmitter', () => {
     emitter = new ArrowParentEmitter(iframe, { ackTimeout: 3000 });
     const postMessage = iframe.contentWindow!.postMessage as ReturnType<typeof vi.fn>;
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     const sendPromise = emitter.sendJSON({ hello: 'world' });
 
@@ -119,7 +137,7 @@ describe('ArrowParentEmitter', () => {
     expect(sentMsg).toBeDefined();
     expect(sentMsg!.format).toBe('json');
 
-    dispatchMessage({
+    dispatchFromIframe(iframe, {
       type: MessageType.DATA_RECEIVED,
       messageId: sentMsg!.messageId,
       success: true,
@@ -139,7 +157,7 @@ describe('ArrowParentEmitter', () => {
     emitter = new ArrowParentEmitter(iframe);
     const postMessage = iframe.contentWindow!.postMessage as ReturnType<typeof vi.fn>;
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     const buf = new Uint8Array([1, 2, 3]);
     const sendPromise = emitter.sendArrowCopy(buf);
@@ -147,13 +165,13 @@ describe('ArrowParentEmitter', () => {
     const sentMsg = postMessage.mock.calls.find(([msg]) => msg.type === MessageType.DATA_TRANSFER)?.[0] as Record<string, unknown> | undefined;
     expect(sentMsg!.format).toBe('arrow-copy');
 
-    dispatchMessage({ type: MessageType.DATA_RECEIVED, messageId: sentMsg!.messageId, success: true, format: 'arrow-copy', rows: 0, cols: 0, processingTime: 1, isZeroCopy: false });
+    dispatchFromIframe(iframe, { type: MessageType.DATA_RECEIVED, messageId: sentMsg!.messageId, success: true, format: 'arrow-copy', rows: 0, cols: 0, processingTime: 1, isZeroCopy: false });
     await sendPromise;
   });
 
   it('ACK timeout rejects the send promise', async () => {
     emitter = new ArrowParentEmitter(iframe, { ackTimeout: 500 });
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     const sendPromise = emitter.sendJSON({ data: 'x' });
     vi.advanceTimersByTime(600);
@@ -163,7 +181,7 @@ describe('ArrowParentEmitter', () => {
 
   it('close rejects pending ACKs', async () => {
     emitter = new ArrowParentEmitter(iframe);
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     const sendPromise = emitter.sendJSON({ data: 'x' });
     emitter.close();
@@ -176,7 +194,7 @@ describe('ArrowParentEmitter', () => {
     const cb = vi.fn();
     emitter = new ArrowParentEmitter(iframe).onStateChange(cb);
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     expect(cb).toHaveBeenCalledWith(State.READY, State.CONNECTING);
   });
@@ -185,19 +203,19 @@ describe('ArrowParentEmitter', () => {
     emitter = new ArrowParentEmitter(iframe);
     const postMessage = iframe.contentWindow!.postMessage as ReturnType<typeof vi.fn>;
 
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     const sendPromise = emitter.send([{ id: 1 }]);
     const sentMsg = postMessage.mock.calls.find(([msg]) => msg.type === MessageType.DATA_TRANSFER)?.[0] as Record<string, unknown>;
     expect(sentMsg.format).toBe('json');
 
-    dispatchMessage({ type: MessageType.DATA_RECEIVED, messageId: sentMsg.messageId, success: true, format: 'json', rows: 1, cols: 1, processingTime: 1, isZeroCopy: false });
+    dispatchFromIframe(iframe, { type: MessageType.DATA_RECEIVED, messageId: sentMsg.messageId, success: true, format: 'json', rows: 1, cols: 1, processingTime: 1, isZeroCopy: false });
     await sendPromise;
   });
 
   it('send() throws on unknown format', async () => {
     emitter = new ArrowParentEmitter(iframe);
-    dispatchMessage({ type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
+    dispatchFromIframe(iframe, { type: MessageType.CHILD_READY, protocolVersion: PROTOCOL_VERSION, messageId: 'x', timestamp: Date.now(), source: 'child' });
 
     await expect(emitter.send({}, { format: 'xml' as never })).rejects.toThrow('Unknown format');
   });
