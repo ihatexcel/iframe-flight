@@ -63,6 +63,7 @@ jobs:
           cp docs/child.html        _site/child.html
           cp docs/child-simple.html _site/child-simple.html
           cp docs/child-chart.html  _site/child-chart.html
+          cp docs/embed.html        _site/embed.html
           cp dist/index.iife.js     _site/iframe-flight.iife.js
           cp dist/index.js          _site/iframe-flight.esm.js
 
