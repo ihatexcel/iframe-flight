@@ -400,7 +400,7 @@ receiver.<span class="fn">onData</span>(<span class="kw">async</span> (result) =
         <div class="px-4 py-3 bg-zinc-50 border-b border-zinc-200">
           <span class="text-sm font-semibold text-zinc-800">Child iframe</span>
         </div>
-        <iframe id="qs-frame" src="./child-simple.html" sandbox="allow-scripts"
+        <iframe id="qs-frame" src="about:blank" sandbox="allow-scripts"
           class="block w-full h-[200px] bg-zinc-50 border-0"></iframe>
       </div>
     </div>
@@ -487,7 +487,7 @@ receiver.<span class="fn">onData</span>((result) => {
 
   <!-- Chart iframe -->
   <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden mb-4">
-    <iframe id="chart-frame" src="./child-chart.html" sandbox="allow-scripts"
+    <iframe id="chart-frame" src="about:blank" sandbox="allow-scripts"
       class="block w-full h-[460px] border-0"></iframe>
   </div>
 
@@ -580,6 +580,8 @@ function route() {
     a.classList.toggle('text-zinc-500',  !active);
     a.classList.toggle('border-transparent', !active);
   });
+  if (page === 'simple') initQsEmitter();
+  if (page === 'chart')  initChartEmitter();
 }
 window.addEventListener('hashchange', route);
 route();
@@ -766,7 +768,7 @@ document.querySelectorAll('input[name="mode-beta"]').forEach(r=>r.addEventListen
 q('btn-resume-alpha').addEventListener('click',()=>{ q('frame-alpha').contentWindow.postMessage({__iframeFlight:'resume'},'*'); q('btn-resume-alpha').disabled=true; appendLog('parent-log','▶ resume → child-alpha','info'); });
 q('btn-resume-beta').addEventListener('click',()=>{ q('frame-beta').contentWindow.postMessage({__iframeFlight:'resume'},'*'); q('btn-resume-beta').disabled=true; appendLog('parent-log','▶ resume → child-beta','info'); });
 
-/* ══ CHART PAGE EMITTER ══ */
+/* ══ CHART PAGE — lazy init ══ */
 const CHART_PRODUCTS = ['Aurora','Beacon','Catalyst','Dynamo','Ember','Forge','Helios','Iris','Jetstream','Kronos','Lumina','Meridian','Nexus','Orbit','Prism'];
 
 function makeChartData(n) {
@@ -777,37 +779,46 @@ function makeChartData(n) {
   return tableToIPC(tableFromArrays({ product: products, revenue, growth, units }));
 }
 
-const chartRowsSlider = q('chart-rows');
-const chartRowsVal    = q('chart-rows-val');
-chartRowsSlider.addEventListener('input', () => { chartRowsVal.textContent = chartRowsSlider.value; });
+q('chart-rows').addEventListener('input', () => { q('chart-rows-val').textContent = q('chart-rows').value; });
 
-let chartEmitter = new ArrowParentEmitter(q('chart-frame'), { handshakeTimeout:10000, ackTimeout:6000, allowedOrigins:['*'] });
-chartEmitter
-  .onStateChange((next) => {
-    if (next === State.READY) {
-      q('chart-send').disabled = false;
-      doChartSend();
-    }
-  })
-  .onError(err => { q('chart-meta').textContent = `❌ ${err.message}`; });
+let chartEmitter = null;
+function initChartEmitter() {
+  if (chartEmitter) return;
+  q('chart-frame').src = './child-chart.html';
+  chartEmitter = new ArrowParentEmitter(q('chart-frame'), { handshakeTimeout:12000, ackTimeout:8000, allowedOrigins:['*'] });
+  chartEmitter
+    .onStateChange(next => {
+      if (next === State.READY) { q('chart-send').disabled = false; doChartSend(); }
+    })
+    .onError(err => { q('chart-meta').textContent = `❌ ${err.message}`; });
+}
 
 function doChartSend() {
-  const buf = makeChartData(parseInt(chartRowsSlider.value, 10));
+  const buf = makeChartData(parseInt(q('chart-rows').value, 10));
   const t0 = performance.now();
   chartEmitter.send(buf).then(ack => {
-    const rtt = Math.round(performance.now() - t0);
-    q('chart-meta').textContent = `${ack.rows} rows · ${ack.cols} cols · ${ack.processingTime}ms transfer · ${rtt}ms RTT`;
+    q('chart-meta').textContent = `${ack.rows} rows · ${ack.cols} cols · ${ack.processingTime}ms · RTT ${Math.round(performance.now()-t0)}ms`;
   }).catch(err => { q('chart-meta').textContent = `❌ ${err.message}`; });
 }
 
 q('chart-send').addEventListener('click', doChartSend);
 
-/* ══ QUICK START PAGE EMITTER ══ */
-let qsEmitter = new ArrowParentEmitter(q('qs-frame'), { handshakeTimeout:8000, ackTimeout:5000, allowedOrigins:['*'] });
-qsEmitter.onStateChange((next,prev) => {
-  setDot('qs-dot', null, next);
-  if (next===State.READY) { q('qs-send').disabled=false; appendLog('qs-log','✅ Ready — click send()','ok'); }
-}).onError(err => appendLog('qs-log',`❌ ${err.message}`,'err'));
+/* ══ QUICK START PAGE — lazy init ══ */
+let qsEmitter = null;
+function initQsEmitter() {
+  if (qsEmitter) return;
+  q('qs-frame').src = './child-simple.html';
+  qsEmitter = new ArrowParentEmitter(q('qs-frame'), { handshakeTimeout:10000, ackTimeout:6000, allowedOrigins:['*'] });
+  qsEmitter
+    .onStateChange((next, prev) => {
+      setDot('qs-dot', null, next);
+      if (next === State.READY && prev !== State.SENDING) {
+        q('qs-send').disabled = false;
+        appendLog('qs-log', '✅ Ready — click send()', 'ok');
+      }
+    })
+    .onError(err => appendLog('qs-log', `❌ ${err.message}`, 'err'));
+}
 
 window.addEventListener('message', e => {
   if (e.data?.__iframeFlight==='log' && e.data.sourceId==='quickstart')
@@ -816,10 +827,10 @@ window.addEventListener('message', e => {
 
 q('qs-send').addEventListener('click', () => {
   const a = makeArrowBuf();
-  appendLog('qs-log','→ send()…');
-  qsEmitter.send(a.buf,{format:'auto',schema:a.schema}).then(ack => {
-    appendLog('qs-log',`✅ rows=${ack.rows} cols=${ack.cols} zeroCopy=${ack.isZeroCopy}`,'ok');
-  }).catch(err => appendLog('qs-log',`❌ ${err.message}`,'err'));
+  appendLog('qs-log', '→ send()…');
+  qsEmitter.send(a.buf, {format:'auto', schema:a.schema}).then(ack => {
+    appendLog('qs-log', `✅ rows=${ack.rows} cols=${ack.cols} zeroCopy=${ack.isZeroCopy}`, 'ok');
+  }).catch(err => appendLog('qs-log', `❌ ${err.message}`, 'err'));
 });
 
 /* ══ TABS ══ */

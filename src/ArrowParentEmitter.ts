@@ -78,6 +78,12 @@ export class ArrowParentEmitter {
         return;
       }
 
+      // Reject messages not originating from our specific iframe.
+      // Without this check every ArrowParentEmitter on the page would
+      // accept the first CHILD_READY it sees, regardless of which iframe
+      // sent it, causing phantom READY transitions and ACK timeouts.
+      if (event.source !== this.iframe.contentWindow) return;
+
       if (type === MessageType.CHILD_READY) {
         if (this.handshakeTimeout) {
           clearTimeout(this.handshakeTimeout);
