@@ -27,6 +27,7 @@
   <a href="#" class="nav-link shrink-0 px-4 py-2 text-sm font-semibold border-b-2 border-blue-600 text-blue-700 -mb-px">Demo</a>
   <a href="#simple" class="nav-link shrink-0 px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-zinc-500 hover:text-zinc-800 -mb-px transition-colors">Quick start</a>
   <a href="#chart" class="nav-link shrink-0 px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-zinc-500 hover:text-zinc-800 -mb-px transition-colors">Visualization</a>
+  <a href="#embed" class="nav-link shrink-0 px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-zinc-500 hover:text-zinc-800 -mb-px transition-colors">Embed</a>
 </nav>
 
 <!-- ══════════════════════════════════════════════
@@ -556,6 +557,44 @@ receiver.<span class="fn">onData</span>(result => {
 
 </div><!-- /page-chart -->
 
+<!-- ══════════════════════════════════════════════
+     PAGE: EMBED
+══════════════════════════════════════════════ -->
+<div data-page="embed" hidden>
+
+  <p class="text-sm text-zinc-500 mb-4">Single-file pattern — the child iframe is injected via <code class="font-mono text-xs bg-zinc-100 px-1 rounded">srcdoc</code>, no separate HTML file needed. Copy the source and open it directly in a browser.</p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+    <!-- Live demo -->
+    <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden flex flex-col">
+      <div class="px-4 py-2.5 bg-zinc-50 border-b border-zinc-200 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
+        <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Live</span>
+        <code class="font-mono text-[11px] text-zinc-400">embed.html</code>
+      </div>
+      <iframe id="embed-frame" src="about:blank" class="block w-full flex-1 border-0" style="height:580px"></iframe>
+    </div>
+
+    <!-- Source code -->
+    <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden flex flex-col">
+      <div class="px-4 py-2.5 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Source</span>
+          <code class="font-mono text-[11px] text-zinc-400">embed.html</code>
+        </div>
+        <button class="copy-btn flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold bg-white text-zinc-500 border border-zinc-200 hover:text-zinc-800 transition-colors" data-target="embed-src">
+          <svg class="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre id="embed-src" class="flex-1 overflow-auto p-4 text-[11.5px] font-mono leading-relaxed bg-white text-zinc-700 whitespace-pre" style="height:580px">Loading…</pre>
+    </div>
+
+  </div>
+
+</div><!-- /page-embed -->
+
 <!-- Footer -->
 <footer class="mt-6 text-xs text-zinc-400 pb-4 border-t border-zinc-200 pt-4">
   <a href="https://github.com/ihatexcel/iframe-flight" target="_blank" class="text-blue-600 hover:underline">github.com/ihatexcel/iframe-flight</a>
@@ -582,6 +621,7 @@ function route() {
   });
   if (page === 'simple') initQsEmitter();
   if (page === 'chart')  initChartEmitter();
+  if (page === 'embed')  initEmbed();
 }
 window.addEventListener('hashchange', route);
 route();
@@ -767,6 +807,18 @@ document.querySelectorAll('input[name="mode-alpha"]').forEach(r=>r.addEventListe
 document.querySelectorAll('input[name="mode-beta"]').forEach(r=>r.addEventListener('change',()=>{styleRadios('.mode-opt','border-green-500');reloadChild('frame-beta','log-beta','beta-dot','beta-state','child-beta','btn-resume-beta',()=>emitterBeta,ne=>emitterBeta=ne);}));
 q('btn-resume-alpha').addEventListener('click',()=>{ q('frame-alpha').contentWindow.postMessage({__iframeFlight:'resume'},'*'); q('btn-resume-alpha').disabled=true; appendLog('parent-log','▶ resume → child-alpha','info'); });
 q('btn-resume-beta').addEventListener('click',()=>{ q('frame-beta').contentWindow.postMessage({__iframeFlight:'resume'},'*'); q('btn-resume-beta').disabled=true; appendLog('parent-log','▶ resume → child-beta','info'); });
+
+/* ══ EMBED PAGE — lazy init ══ */
+let embedInited = false;
+function initEmbed() {
+  if (embedInited) return;
+  embedInited = true;
+  q('embed-frame').src = './embed.html';
+  fetch('./embed.html')
+    .then(r => r.text())
+    .then(src => { q('embed-src').textContent = src; })
+    .catch(() => { q('embed-src').textContent = '(could not load source)'; });
+}
 
 /* ══ CHART PAGE — lazy init ══ */
 const CHART_PRODUCTS = ['Aurora','Beacon','Catalyst','Dynamo','Ember','Forge','Helios','Iris','Jetstream','Kronos','Lumina','Meridian','Nexus','Orbit','Prism'];
